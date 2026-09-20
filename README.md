@@ -48,7 +48,7 @@ Setelah semua persyaratan di atas terpenuhi, ikuti instruksi singkat berikut:
 ### 1. Kloning Repositori & Setup Database
 Pertama, buka terminal Anda dan *clone* repositori ini:
 ```bash
-git clone <URL_GITHUB_ANDA>
+git clone https://github.com/DavinsonCloud18/CoreQA.git
 cd CoreQA
 ```
 
