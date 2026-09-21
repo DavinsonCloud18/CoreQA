@@ -6,46 +6,76 @@ export function SummaryCards({ summary }: { summary: any }) {
     return Math.round((count / summary.total) * 100);
   };
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      {/* Passed */}
-      <div className="p-6 rounded-[2rem] bg-emerald-500/10 backdrop-blur-xl border border-emerald-400/20 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-emerald-400/40 transition-colors">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-[50px] rounded-full group-hover:bg-emerald-400/30 transition-all duration-500"></div>
-        <span className="text-emerald-300 font-bold text-sm tracking-wide uppercase relative z-10">Passed</span>
-        <div className="mt-8 flex items-end justify-between relative z-10">
-          <span className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]">{summary?.['PASSED'] || 0}</span>
-          <span className="text-emerald-200/90 font-bold bg-emerald-500/30 px-3 py-1.5 rounded-lg border border-emerald-400/30 shadow-inner">{getPercentage(summary?.['PASSED'] || 0)}%</span>
-        </div>
-      </div>
-      
-      {/* Passed with Notes */}
-      <div className="p-6 rounded-[2rem] bg-amber-500/10 backdrop-blur-xl border border-amber-400/20 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-amber-400/40 transition-colors">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 blur-[50px] rounded-full group-hover:bg-amber-400/30 transition-all duration-500"></div>
-        <span className="text-amber-300 font-bold text-sm tracking-wide uppercase relative z-10">Passed (Notes)</span>
-        <div className="mt-8 flex items-end justify-between relative z-10">
-          <span className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">{summary?.['PASSED WITH NOTES'] || 0}</span>
-          <span className="text-amber-200/90 font-bold bg-amber-500/30 px-3 py-1.5 rounded-lg border border-amber-400/30 shadow-inner">{getPercentage(summary?.['PASSED WITH NOTES'] || 0)}%</span>
-        </div>
-      </div>
+  const total = summary?.total || 0;
+  const passed = summary?.['PASSED'] || 0;
+  const passedNotes = summary?.['PASSED WITH NOTES'] || 0;
+  const failed = summary?.['FAILED'] || 0;
+  const blocked = summary?.['BLOCKED'] || 0;
+  const todo = summary?.['TO DO'] || 0;
+  
+  const completed = total - todo;
+  const completionPct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const passRate = total > 0 ? Math.round(((passed + passedNotes) / total) * 100) : 0;
 
-      {/* Failed */}
-      <div className="p-6 rounded-[2rem] bg-rose-500/10 backdrop-blur-xl border border-rose-400/20 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-rose-400/40 transition-colors">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/20 blur-[50px] rounded-full group-hover:bg-rose-400/30 transition-all duration-500"></div>
-        <span className="text-rose-300 font-bold text-sm tracking-wide uppercase relative z-10">Failed</span>
-        <div className="mt-8 flex items-end justify-between relative z-10">
-          <span className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]">{summary?.['FAILED'] || 0}</span>
-          <span className="text-rose-200/90 font-bold bg-rose-500/30 px-3 py-1.5 rounded-lg border border-rose-400/30 shadow-inner">{getPercentage(summary?.['FAILED'] || 0)}%</span>
+  return (
+    <div className="p-6 rounded-[2rem] bg-indigo-950/20 backdrop-blur-xl border border-indigo-500/20 shadow-2xl relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full group-hover:bg-indigo-400/20 transition-all duration-700"></div>
+      
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+        
+        {/* Main Progress Indicator */}
+        <div className="flex flex-col gap-2">
+          <span className="text-indigo-200 font-bold text-sm tracking-wide uppercase">Execution Progress</span>
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]">{completed}</span>
+            <span className="text-xl font-bold text-indigo-300/50">/ {total}</span>
+            
+            <div className="ml-1 sm:ml-3 flex gap-2">
+              <span className="text-indigo-200/90 font-bold bg-indigo-500/30 px-3 py-1.5 rounded-lg border border-indigo-400/30 shadow-inner">
+                {completionPct}% Executed
+              </span>
+              <span className="text-emerald-200/90 font-bold bg-emerald-500/30 px-3 py-1.5 rounded-lg border border-emerald-400/30 shadow-inner">
+                {passRate}% Passed
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Breakdown Badges */}
+        <div className="flex flex-wrap gap-3 lg:justify-end">
+          <div className="flex flex-col items-center bg-emerald-500/10 border border-emerald-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+            <span className="text-emerald-400 text-2xl font-bold">{passed}</span>
+            <span className="text-emerald-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Passed</span>
+          </div>
+          
+          <div className="flex flex-col items-center bg-amber-500/10 border border-amber-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+            <span className="text-amber-400 text-2xl font-bold">{passedNotes}</span>
+            <span className="text-amber-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Notes</span>
+          </div>
+          
+          <div className="flex flex-col items-center bg-rose-500/10 border border-rose-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+            <span className="text-rose-400 text-2xl font-bold">{failed}</span>
+            <span className="text-rose-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Failed</span>
+          </div>
+          
+          <div className="flex flex-col items-center bg-slate-500/10 border border-slate-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+            <span className="text-slate-400 text-2xl font-bold">{blocked}</span>
+            <span className="text-slate-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Blocked</span>
+          </div>
+          
+          <div className="flex flex-col items-center bg-white/5 border border-white/10 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+            <span className="text-white/60 text-2xl font-bold">{todo}</span>
+            <span className="text-white/40 text-[10px] uppercase font-black tracking-wider mt-1">To Do</span>
+          </div>
         </div>
       </div>
       
-      {/* Untested */}
-      <div className="p-6 rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-white/20 transition-colors">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[50px] rounded-full group-hover:bg-white/10 transition-all duration-500"></div>
-        <span className="text-indigo-200 font-bold text-sm tracking-wide uppercase relative z-10">Untested</span>
-        <div className="mt-8 flex items-end justify-between relative z-10">
-          <span className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">{summary?.['UNTESTED'] || 0}</span>
-          <span className="text-indigo-200/90 font-bold bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 shadow-inner">{getPercentage(summary?.['UNTESTED'] || 0)}%</span>
-        </div>
+      {/* Visual Progress Bar (Multi-Segment) */}
+      <div className="w-full h-3 bg-black/40 rounded-full mt-8 overflow-hidden flex relative z-10 border border-white/5 shadow-inner">
+        <div style={{ width: `${getPercentage(passed)}%` }} className="h-full bg-emerald-400 hover:bg-emerald-300 transition-all duration-1000 shadow-[0_0_10px_rgba(52,211,153,0.5)]" title="Passed"></div>
+        <div style={{ width: `${getPercentage(passedNotes)}%` }} className="h-full bg-amber-400 hover:bg-amber-300 transition-all duration-1000 shadow-[0_0_10px_rgba(251,191,36,0.5)]" title="Passed with Notes"></div>
+        <div style={{ width: `${getPercentage(failed)}%` }} className="h-full bg-rose-400 hover:bg-rose-300 transition-all duration-1000 shadow-[0_0_10px_rgba(244,63,94,0.5)]" title="Failed"></div>
+        <div style={{ width: `${getPercentage(blocked)}%` }} className="h-full bg-slate-400 hover:bg-slate-300 transition-all duration-1000 shadow-[0_0_10px_rgba(148,163,184,0.5)]" title="Blocked"></div>
       </div>
     </div>
   );

@@ -15,29 +15,57 @@ export declare class ExecutionController {
                 id: number;
                 name: string;
             };
+            session: {
+                name: string;
+            };
             testcase: {
-                moduleId: string;
+                module: {
+                    name: string;
+                    code: string;
+                };
+                steps: {
+                    id: string;
+                    testcaseId: string;
+                    sequence: number;
+                    expectedResult: string;
+                    action: string;
+                }[];
+            } & {
                 id: string;
-                updatedAt: Date;
                 createdAt: Date;
+                updatedAt: Date;
+                moduleId: string;
+                description: string | null;
                 sequence: number;
                 title: string;
-                description: string | null;
                 expectedResult: string | null;
             };
             executedBy: {
                 id: string;
                 name: string;
             } | null;
+            stepExecutions: ({
+                status: {
+                    id: number;
+                    name: string;
+                };
+            } & {
+                id: string;
+                updatedAt: Date;
+                statusId: number;
+                notes: string | null;
+                sessionExecutionId: string;
+                stepId: string;
+            })[];
         } & {
+            id: string;
+            updatedAt: Date;
             statusId: number;
             notes: string | null;
-            id: string;
             sessionId: string;
             testcaseId: string;
             executedById: string | null;
             executedAt: Date;
-            updatedAt: Date;
         })[];
     }>;
     claimModule(sessionId: string, moduleId: string, userId: string): Promise<{
@@ -52,14 +80,30 @@ export declare class ExecutionController {
                 name: string;
             };
         } & {
+            id: string;
+            updatedAt: Date;
             statusId: number;
             notes: string | null;
-            id: string;
             sessionId: string;
             testcaseId: string;
             executedById: string | null;
             executedAt: Date;
+        };
+    }>;
+    updateStepStatus(sessionId: string, testcaseId: string, stepId: string, dto: UpdateExecutionStatusDto, userId: string): Promise<{
+        message: string;
+        data: {
+            status: {
+                id: number;
+                name: string;
+            };
+        } & {
+            id: string;
             updatedAt: Date;
+            statusId: number;
+            notes: string | null;
+            sessionExecutionId: string;
+            stepId: string;
         };
     }>;
 }

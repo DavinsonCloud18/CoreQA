@@ -47,8 +47,9 @@ model Environment {
 
 model Status {
   id          Int                @id @default(autoincrement())
-  name        String             @unique // e.g., "PASSED", "FAILED", "PASSED WITH NOTES", "UNTESTED"
-  executions  SessionExecution[]
+  name                String                 @unique // e.g., "PASSED", "FAILED", "PASSED WITH NOTES", "UNTESTED"
+  executions          SessionExecution[]
+  stepExecutions      SessionStepExecution[]
 
   @@map("statuses")
 }
@@ -59,6 +60,7 @@ model Status {
 
 model Module {
   id             String           @id @default(uuid())
+  code           String           @unique
   name           String
   description    String?
   testcases      MasterTestcase[]
@@ -78,12 +80,26 @@ model MasterTestcase {
   description    String?
   expectedResult String?
   sequence       Int                @default(0)
+  steps          TestcaseStep[]
   executions     SessionExecution[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
   @@index([moduleId])
   @@map("master_testcases")
+}
+
+model TestcaseStep {
+  id             String         @id @default(uuid())
+  testcaseId     String
+  testcase       MasterTestcase @relation(fields: [testcaseId], references: [id], onDelete: Cascade)
+  sequence       Int
+  action         String
+  expectedResult String
+  sessionExecutions SessionStepExecution[]
+
+  @@index([testcaseId])
+  @@map("testcase_steps")
 }
 
 // =======================
@@ -96,6 +112,7 @@ model Session {
   environmentId  Int
   environment    Environment        @relation(fields: [environmentId], references: [id])
   isOpen         Boolean            @default(true) 
+  status         String             @default("TO DO") // e.g. "TO DO", "On Progress", "Finished"
   startDate      DateTime           @default(now())
   endDate        DateTime?
   sessionModules SessionModule[]
@@ -106,6 +123,7 @@ model Session {
 
   @@index([environmentId])
   @@index([isOpen])
+  @@index([status])
   @@map("sessions")
 }
 
@@ -136,6 +154,8 @@ model SessionExecution {
   executedAt   DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
+  stepExecutions SessionStepExecution[]
+
   @@unique([sessionId, testcaseId]) 
   @@index([sessionId])
   @@index([testcaseId])
@@ -160,4 +180,22 @@ model ClaimHistory {
   @@index([claimedById])
   @@index([sessionId, moduleId, isActive]) 
   @@map("claim_histories")
+}
+
+model SessionStepExecution {
+  id                 String           @id @default(uuid())
+  sessionExecutionId String
+  sessionExecution   SessionExecution @relation(fields: [sessionExecutionId], references: [id], onDelete: Cascade)
+  stepId             String
+  step               TestcaseStep     @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  statusId           Int
+  status             Status           @relation(fields: [statusId], references: [id])
+  notes              String?
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([sessionExecutionId, stepId])
+  @@index([sessionExecutionId])
+  @@index([stepId])
+  @@index([statusId])
+  @@map("session_step_executions")
 }

@@ -4,7 +4,6 @@ import { GetTestcasesQueryDto, UpdateExecutionStatusDto } from './execution.dto.
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 
 @Controller('sessions/:sessionId')
-@UseGuards(JwtAuthGuard)
 export class ExecutionController {
   constructor(private readonly executionService: ExecutionService) {}
 
@@ -36,5 +35,17 @@ export class ExecutionController {
   ) {
     const result = await this.executionService.updateExecutionStatus(sessionId, testcaseId, userId, dto);
     return { message: 'Status eksekusi berhasil diupdate', data: result };
+  }
+
+  @Patch('testcases/:testcaseId/steps/:stepId/status')
+  async updateStepStatus(
+    @Param('sessionId') sessionId: string,
+    @Param('testcaseId') testcaseId: string,
+    @Param('stepId') stepId: string,
+    @Body() dto: UpdateExecutionStatusDto,
+    @Body('userId') userId: string 
+  ) {
+    const result = await this.executionService.updateStepExecutionStatus(sessionId, testcaseId, stepId, userId, dto);
+    return { message: 'Status step berhasil diupdate', data: result };
   }
 }

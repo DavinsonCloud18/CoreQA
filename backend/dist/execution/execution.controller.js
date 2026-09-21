@@ -10,10 +10,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Post, Patch, Body, Param, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ExecutionService } from './execution.service.js';
 import { GetTestcasesQueryDto, UpdateExecutionStatusDto } from './execution.dto.js';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 let ExecutionController = class ExecutionController {
     executionService;
     constructor(executionService) {
@@ -29,6 +28,10 @@ let ExecutionController = class ExecutionController {
     async updateStatus(sessionId, testcaseId, dto, userId) {
         const result = await this.executionService.updateExecutionStatus(sessionId, testcaseId, userId, dto);
         return { message: 'Status eksekusi berhasil diupdate', data: result };
+    }
+    async updateStepStatus(sessionId, testcaseId, stepId, dto, userId) {
+        const result = await this.executionService.updateStepExecutionStatus(sessionId, testcaseId, stepId, userId, dto);
+        return { message: 'Status step berhasil diupdate', data: result };
     }
 };
 __decorate([
@@ -59,9 +62,19 @@ __decorate([
     __metadata("design:paramtypes", [String, String, UpdateExecutionStatusDto, String]),
     __metadata("design:returntype", Promise)
 ], ExecutionController.prototype, "updateStatus", null);
+__decorate([
+    Patch('testcases/:testcaseId/steps/:stepId/status'),
+    __param(0, Param('sessionId')),
+    __param(1, Param('testcaseId')),
+    __param(2, Param('stepId')),
+    __param(3, Body()),
+    __param(4, Body('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, UpdateExecutionStatusDto, String]),
+    __metadata("design:returntype", Promise)
+], ExecutionController.prototype, "updateStepStatus", null);
 ExecutionController = __decorate([
     Controller('sessions/:sessionId'),
-    UseGuards(JwtAuthGuard),
     __metadata("design:paramtypes", [ExecutionService])
 ], ExecutionController);
 export { ExecutionController };

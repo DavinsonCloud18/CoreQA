@@ -1,6 +1,7 @@
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { ModuleProgress } from '@/components/dashboard/ModuleProgress';
 import { LogoutButton } from '@/components/dashboard/LogoutButton';
+import { Sidebar } from '@/components/dashboard/Sidebar';
 
 async function fetchAnalytics(sessionId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -21,8 +22,10 @@ export default async function DashboardPage({ params }: { params: Promise<{ sess
       {/* Dark overlay matching login page */}
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[20px]"></div>
 
-      <div className="relative z-10 w-full p-8 text-white font-sans overflow-y-auto">
-        <div className="max-w-6xl mx-auto space-y-8 pb-12">
+      <Sidebar />
+
+      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
+        <div className="w-full space-y-8 pb-12">
           {/* Header */}
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[2rem] shadow-2xl">
             <div>

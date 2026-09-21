@@ -10,13 +10,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service.js';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 let AnalyticsController = class AnalyticsController {
     analyticsService;
     constructor(analyticsService) {
         this.analyticsService = analyticsService;
+    }
+    async getGlobalAnalytics(sessionId) {
+        const data = await this.analyticsService.getGlobalAnalytics(sessionId);
+        return { message: 'Analytics retrieved', data };
     }
     async getAnalytics(sessionId) {
         const data = await this.analyticsService.getSessionAnalytics(sessionId);
@@ -24,15 +27,21 @@ let AnalyticsController = class AnalyticsController {
     }
 };
 __decorate([
-    Get(),
+    Get('analytics'),
+    __param(0, Query('sessionId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AnalyticsController.prototype, "getGlobalAnalytics", null);
+__decorate([
+    Get('sessions/:sessionId/analytics'),
     __param(0, Param('sessionId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AnalyticsController.prototype, "getAnalytics", null);
 AnalyticsController = __decorate([
-    Controller('sessions/:sessionId/analytics'),
-    UseGuards(JwtAuthGuard),
+    Controller(),
     __metadata("design:paramtypes", [AnalyticsService])
 ], AnalyticsController);
 export { AnalyticsController };

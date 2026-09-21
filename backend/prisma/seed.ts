@@ -8,6 +8,7 @@ async function main() {
   const hashedPassword = await bcrypt.hash('password123', salt);
 
   console.log('Menghapus data lama...');
+  await prisma.claimHistory.deleteMany();
   await prisma.sessionExecution.deleteMany();
   await prisma.sessionModule.deleteMany();
   await prisma.session.deleteMany();
@@ -24,44 +25,116 @@ async function main() {
   const roleLeader = await prisma.role.create({ data: { name: 'Leader' } });
   const roleQA = await prisma.role.create({ data: { name: 'QA Member' } });
 
-  // 2. Users
-  const user2 = await prisma.user.create({
-    data: { email: 'qa1@coreqa.com', name: 'Alice QA', password: hashedPassword, roleId: roleQA.id },
-  });
+  // 2. Users (QA Team)
+  const users = await Promise.all([
+    prisma.user.create({ data: { email: 'qa1@coreqa.com', name: 'Alice Smith', password: hashedPassword, roleId: roleQA.id } }),
+    prisma.user.create({ data: { email: 'qa2@coreqa.com', name: 'Bob Johnson', password: hashedPassword, roleId: roleQA.id } }),
+    prisma.user.create({ data: { email: 'qa3@coreqa.com', name: 'Charlie Lee', password: hashedPassword, roleId: roleQA.id } }),
+    prisma.user.create({ data: { email: 'lead@coreqa.com', name: 'Diana Prince', password: hashedPassword, roleId: roleLeader.id } })
+  ]);
 
   // 3. Environment
-  const envSIT = await prisma.environment.create({
-    data: { name: 'SIT', description: 'System Integration Testing' },
-  });
+  const envSIT = await prisma.environment.create({ data: { name: 'SIT', description: 'System Integration Testing' } });
+  const envUAT = await prisma.environment.create({ data: { name: 'UAT', description: 'User Acceptance Testing' } });
+  const envPROD = await prisma.environment.create({ data: { name: 'PROD', description: 'Production Environment' } });
 
   // 4. Statuses
-  const statuses = ['PASSED', 'FAILED', 'PASSED WITH NOTES', 'UNTESTED'];
+  const statuses = ['PASSED', 'FAILED', 'PASSED WITH NOTES', 'BLOCKED', 'TO DO'];
   const statusRecords: Record<string, any> = {};
   for (const s of statuses) {
     statusRecords[s] = await prisma.status.create({ data: { name: s } });
   }
 
-  // 5. Modules
+  // 5. Modules (Features)
   const moduleAuth = await prisma.module.create({
-    data: { name: 'Authentication Module', description: 'Login and Register flows' },
+    data: { name: 'Authentication & Authorization', code: 'AUTH', description: 'Handles user login, signup, and roles' }
   });
-  const modulePayment = await prisma.module.create({
-    data: { name: 'Payment Gateway', description: 'Checkout and Stripe flows' },
+  const moduleCart = await prisma.module.create({
+    data: { name: 'Product Catalog', code: 'CAT', description: 'Product listings and search' }
   });
-  const moduleProfile = await prisma.module.create({
-    data: { name: 'User Profile', description: 'Avatar and settings' },
+  const moduleCheckout = await prisma.module.create({
+    data: { name: 'Checkout Process', code: 'CHK', description: 'Cart and payment processing' }
   });
 
-  // 6. Testcases
-  for (let i = 1; i <= 20; i++) {
+  // 6. Testcases for Features
+  
+  // Auth Testcases
+  const authTestcases = [
+    { title: 'Login with valid credentials', expectedResult: 'User is successfully logged in and redirected to dashboard' },
+    { title: 'Login with invalid password', expectedResult: 'Error message "Invalid password" is shown' },
+    { title: 'Login with non-existent email', expectedResult: 'Error message "User not found" is shown' },
+    { title: 'Register with existing email', expectedResult: 'Error message "Email already in use" is shown' },
+    { title: 'Password reset link generation', expectedResult: 'Password reset link is sent to user email' },
+  ];
+  
+  for (let i = 0; i < authTestcases.length; i++) {
     await prisma.masterTestcase.create({
-      data: { moduleId: moduleAuth.id, title: `Auth TC ${i}`, sequence: i },
+      data: { 
+        moduleId: moduleAuth.id, 
+        title: authTestcases[i].title, 
+        expectedResult: authTestcases[i].expectedResult, 
+        sequence: i + 1,
+        steps: {
+          create: [
+            { sequence: 1, action: 'Navigate to application URL', expectedResult: 'Application loads successfully' },
+            { sequence: 2, action: 'Perform required interaction for ' + authTestcases[i].title, expectedResult: 'System responds appropriately' },
+            { sequence: 3, action: 'Verify the final outcome', expectedResult: authTestcases[i].expectedResult }
+          ]
+        }
+      },
     });
+  }
+
+  // Cart Testcases
+  const cartTestcases = [
+    { title: 'Add in-stock item to cart', expectedResult: 'Item is added, cart counter increases by 1' },
+    { title: 'Add out-of-stock item to cart', expectedResult: '"Add to Cart" button is disabled' },
+    { title: 'Remove item from cart', expectedResult: 'Item disappears from cart list, total price updates' },
+    { title: 'Update item quantity in cart', expectedResult: 'Total price recalculates based on new quantity' },
+    { title: 'Apply valid promo code', expectedResult: 'Discount is applied to the total price' },
+  ];
+
+  for (let i = 0; i < cartTestcases.length; i++) {
     await prisma.masterTestcase.create({
-      data: { moduleId: modulePayment.id, title: `Payment TC ${i}`, sequence: i },
+      data: { 
+        moduleId: moduleCart.id, 
+        title: cartTestcases[i].title, 
+        expectedResult: cartTestcases[i].expectedResult, 
+        sequence: i + 1,
+        steps: {
+          create: [
+            { sequence: 1, action: 'Navigate to application URL', expectedResult: 'Application loads successfully' },
+            { sequence: 2, action: 'Perform required interaction for ' + cartTestcases[i].title, expectedResult: 'System responds appropriately' },
+            { sequence: 3, action: 'Verify the final outcome', expectedResult: cartTestcases[i].expectedResult }
+          ]
+        }
+      },
     });
+  }
+
+  // Checkout Testcases
+  const checkoutTestcases = [
+    { title: 'Proceed to checkout with empty cart', expectedResult: 'User is blocked and shown "Cart is empty" message' },
+    { title: 'Select default shipping address', expectedResult: 'Shipping cost is calculated based on address' },
+    { title: 'Payment via Credit Card (Valid)', expectedResult: 'Payment succeeds, order confirmation page is shown' },
+    { title: 'Payment via Credit Card (Insufficient Funds)', expectedResult: 'Payment fails, user is prompted to try another method' },
+  ];
+
+  for (let i = 0; i < checkoutTestcases.length; i++) {
     await prisma.masterTestcase.create({
-      data: { moduleId: moduleProfile.id, title: `Profile TC ${i}`, sequence: i },
+      data: { 
+        moduleId: moduleCheckout.id, 
+        title: checkoutTestcases[i].title, 
+        expectedResult: checkoutTestcases[i].expectedResult, 
+        sequence: i + 1,
+        steps: {
+          create: [
+            { sequence: 1, action: 'Navigate to application URL', expectedResult: 'Application loads successfully' },
+            { sequence: 2, action: 'Perform required interaction for ' + checkoutTestcases[i].title, expectedResult: 'System responds appropriately' },
+            { sequence: 3, action: 'Verify the final outcome', expectedResult: checkoutTestcases[i].expectedResult }
+          ]
+        }
+      },
     });
   }
 
@@ -71,47 +144,180 @@ async function main() {
   const session = await prisma.session.create({
     data: {
       id: SESSION_ID,
-      name: 'Sprint 42 Regression',
+      name: 'v2.0 Full Regression',
       environmentId: envSIT.id,
       isOpen: true,
+      status: 'On Progress',
+      startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+      endDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
       sessionModules: {
         create: [
           { moduleId: moduleAuth.id },
-          { moduleId: modulePayment.id },
-          { moduleId: moduleProfile.id },
+          { moduleId: moduleCart.id },
+          { moduleId: moduleCheckout.id },
         ],
       },
     },
   });
 
-  // 8. Session Executions (Randomized untuk memunculkan variasi di Dashboard)
+  // 8. Session Executions 
   const allTestcases = await prisma.masterTestcase.findMany();
-  for (const tc of allTestcases) {
-    let statusId = statusRecords['UNTESTED'].id;
-    
-    // Auth: Banyak lulus
-    if (tc.moduleId === moduleAuth.id) {
-      statusId = Math.random() > 0.15 ? statusRecords['PASSED'].id : statusRecords['FAILED'].id;
-    } 
-    // Payment: Banyak error!
-    else if (tc.moduleId === modulePayment.id) {
-      statusId = Math.random() > 0.45 ? statusRecords['FAILED'].id : statusRecords['PASSED WITH NOTES'].id;
-    } 
-    // Profile: Sempurna
-    else {
-      statusId = Math.random() > 0.05 ? statusRecords['PASSED'].id : statusRecords['UNTESTED'].id;
-    }
 
-    await prisma.sessionExecution.create({
-      data: {
-        sessionId: session.id,
-        testcaseId: tc.id,
-        statusId: statusId,
-        executedById: user2.id,
-        notes: statusId === statusRecords['PASSED WITH NOTES'].id ? 'Slight delay during loading' : null,
+  // Helper function to seed execution
+  const seedExecutions = async (targetSession: any, modifier: number) => {
+    for (const tc of allTestcases) {
+      let statusId = statusRecords['TO DO'].id;
+      let executedById = null;
+      let notes = null;
+      
+      // Auth: mostly passed by Alice
+      if (tc.moduleId === moduleAuth.id) {
+        statusId = Math.random() > (0.2 * modifier) ? statusRecords['PASSED'].id : statusRecords['FAILED'].id;
+        executedById = users[0].id; // Alice
+        if (statusId === statusRecords['FAILED'].id) notes = 'API timeout during login attempt';
+      } 
+      // Cart: mostly passed with notes by Bob
+      else if (tc.moduleId === moduleCart.id) {
+        statusId = Math.random() > (0.5 * modifier) ? statusRecords['PASSED'].id : statusRecords['PASSED WITH NOTES'].id;
+        executedById = users[1].id; // Bob
+        if (statusId === statusRecords['PASSED WITH NOTES'].id) notes = 'Promo code takes 3 seconds to apply';
+      } 
+      // Checkout: mostly TO DO (unassigned/unexecuted)
+      else {
+        if (Math.random() > (0.7 * modifier)) {
+          statusId = statusRecords['FAILED'].id;
+          executedById = users[2].id; // Charlie
+          notes = 'Stripe payment gateway integration throws 500 error';
+        } else {
+          statusId = statusRecords['TO DO'].id;
+        }
+      }
+
+      await prisma.sessionExecution.create({
+        data: {
+          sessionId: targetSession.id,
+          testcaseId: tc.id,
+          statusId: statusId,
+          executedById: executedById,
+          notes: notes,
+        },
+      });
+    }
+  };
+
+  await seedExecutions(session, 1);
+
+  // Create Session 2
+  const SESSION2_ID = '223e4567-e89b-12d3-a456-426614174001';
+  const session2 = await prisma.session.create({
+    data: {
+      id: SESSION2_ID,
+      name: 'v2.1 Hotfix Regression',
+      environmentId: envPROD.id,
+      isOpen: true,
+      status: 'On Progress',
+      startDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+      sessionModules: {
+        create: [
+          { moduleId: moduleAuth.id },
+          { moduleId: moduleCheckout.id },
+        ],
       },
-    });
+    },
+  });
+
+  await seedExecutions(session2, 0.5);
+
+  // Create Session 3 (Finished)
+  const SESSION3_ID = '323e4567-e89b-12d3-a456-426614174002';
+  const session3 = await prisma.session.create({
+    data: {
+      id: SESSION3_ID,
+      name: 'v1.0 Legacy Platform Final Test',
+      environmentId: envPROD.id,
+      isOpen: false,
+      status: 'Done',
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      endDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 14 days ago
+      sessionModules: {
+        create: [
+          { moduleId: moduleCart.id },
+        ],
+      },
+    },
+  });
+  
+  // Seed executions for finished session (all passed or failed, no to-dos)
+  for (const tc of allTestcases) {
+    if (tc.moduleId === moduleCart.id) {
+      await prisma.sessionExecution.create({
+        data: {
+          sessionId: session3.id,
+          testcaseId: tc.id,
+          statusId: Math.random() > 0.1 ? statusRecords['PASSED'].id : statusRecords['FAILED'].id,
+          executedById: users[1].id,
+          notes: 'Legacy test execution',
+        },
+      });
+    }
   }
+
+
+  // 9. Claim Histories (Assigning modules to users)
+  // Session 1
+  await prisma.claimHistory.create({
+    data: {
+      sessionId: session.id,
+      moduleId: moduleAuth.id,
+      claimedById: users[0].id, // Alice claimed Auth
+      isActive: true,
+    }
+  });
+  await prisma.claimHistory.create({
+    data: {
+      sessionId: session.id,
+      moduleId: moduleCart.id,
+      claimedById: users[1].id, // Bob claimed Cart
+      isActive: true,
+    }
+  });
+  await prisma.claimHistory.create({
+    data: {
+      sessionId: session.id,
+      moduleId: moduleCheckout.id,
+      claimedById: users[0].id, // Alice claimed Checkout
+      isActive: true,
+    }
+  });
+
+  // Session 2
+  await prisma.claimHistory.create({
+    data: {
+      sessionId: session2.id,
+      moduleId: moduleAuth.id,
+      claimedById: users[1].id, // Bob claimed Auth
+      isActive: true,
+    }
+  });
+  await prisma.claimHistory.create({
+    data: {
+      sessionId: session2.id,
+      moduleId: moduleCheckout.id,
+      claimedById: users[2].id, // Charlie claimed Checkout
+      isActive: true,
+    }
+  });
+
+  // Session 3
+  await prisma.claimHistory.create({
+    data: {
+      sessionId: session3.id,
+      moduleId: moduleCart.id,
+      claimedById: users[1].id, // Bob claimed Cart
+      isActive: true,
+    }
+  });
 
   console.log(`\n\n🎉 Seeding berhasil!`);
   console.log(`👉 Silakan buka browser Anda di: http://localhost:3000/dashboard/sessions/${session.id}`);
