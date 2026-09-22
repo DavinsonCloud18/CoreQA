@@ -1,0 +1,1 @@
+import { PrismaClient } from '@prisma/client'; const prisma = new PrismaClient(); async function main() { const data = await prisma.sessionExecution.findFirst({ include: { testcase: { include: { module: { include: { claimHistories: { where: { isActive: true } } } } } } } }); console.log(JSON.stringify(data?.testcase?.module, null, 2)); } main();  

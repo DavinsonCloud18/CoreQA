@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
 import { SessionsService } from './sessions.service.js';
 import { CreateSessionDto } from './sessions.dto.js';
 let SessionsController = class SessionsController {
@@ -29,6 +29,10 @@ let SessionsController = class SessionsController {
     async getSessionModules(sessionId) {
         const data = await this.sessionsService.getSessionModules(sessionId);
         return { data };
+    }
+    async updateSessionStatus(sessionId, status) {
+        const data = await this.sessionsService.updateSessionStatus(sessionId, status);
+        return { message: 'Session status updated', data };
     }
 };
 __decorate([
@@ -51,6 +55,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SessionsController.prototype, "getSessionModules", null);
+__decorate([
+    Patch(':sessionId/status'),
+    __param(0, Param('sessionId')),
+    __param(1, Body('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], SessionsController.prototype, "updateSessionStatus", null);
 SessionsController = __decorate([
     Controller('sessions'),
     __metadata("design:paramtypes", [SessionsService])

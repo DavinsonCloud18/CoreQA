@@ -5,13 +5,14 @@ const prisma = new PrismaClient();
 
 async function main() {
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash('password123', salt);
+  const hashedPassword = await bcrypt.hash('CoreQA_2026!Sec', salt);
 
   console.log('Menghapus data lama...');
   await prisma.claimHistory.deleteMany();
   await prisma.sessionExecution.deleteMany();
   await prisma.sessionModule.deleteMany();
   await prisma.session.deleteMany();
+  await prisma.testcaseNotification.deleteMany();
   await prisma.masterTestcase.deleteMany();
   await prisma.module.deleteMany();
   await prisma.status.deleteMany();
@@ -22,11 +23,13 @@ async function main() {
   console.log('Menyemai (Seeding) data baru...');
 
   // 1. Roles
+  const roleAdmin = await prisma.role.create({ data: { name: 'Admin' } });
   const roleLeader = await prisma.role.create({ data: { name: 'Leader' } });
   const roleQA = await prisma.role.create({ data: { name: 'QA Member' } });
 
   // 2. Users (QA Team)
   const users = await Promise.all([
+    prisma.user.create({ data: { email: 'admin@coreqa.com', name: 'Super Admin', password: hashedPassword, roleId: roleAdmin.id } }),
     prisma.user.create({ data: { email: 'qa1@coreqa.com', name: 'Alice Smith', password: hashedPassword, roleId: roleQA.id } }),
     prisma.user.create({ data: { email: 'qa2@coreqa.com', name: 'Bob Johnson', password: hashedPassword, roleId: roleQA.id } }),
     prisma.user.create({ data: { email: 'qa3@coreqa.com', name: 'Charlie Lee', password: hashedPassword, roleId: roleQA.id } }),
@@ -39,7 +42,7 @@ async function main() {
   const envPROD = await prisma.environment.create({ data: { name: 'PROD', description: 'Production Environment' } });
 
   // 4. Statuses
-  const statuses = ['PASSED', 'FAILED', 'PASSED WITH NOTES', 'BLOCKED', 'TO DO'];
+  const statuses = ['PASSED', 'FAILED', 'PASSED WITH NOTES', 'BLOCKED', 'DROPPED', 'TO DO'];
   const statusRecords: Record<string, any> = {};
   for (const s of statuses) {
     statusRecords[s] = await prisma.status.create({ data: { name: s } });
@@ -47,13 +50,13 @@ async function main() {
 
   // 5. Modules (Features)
   const moduleAuth = await prisma.module.create({
-    data: { name: 'Authentication & Authorization', code: 'AUTH', description: 'Handles user login, signup, and roles' }
+    data: { name: 'Authentication & Authorization', code: 'AUTH', description: 'Handles user login, signup, and roles', testcaseCount: 5 }
   });
   const moduleCart = await prisma.module.create({
-    data: { name: 'Product Catalog', code: 'CAT', description: 'Product listings and search' }
+    data: { name: 'Product Catalog', code: 'CAT', description: 'Product listings and search', testcaseCount: 5 }
   });
   const moduleCheckout = await prisma.module.create({
-    data: { name: 'Checkout Process', code: 'CHK', description: 'Cart and payment processing' }
+    data: { name: 'Checkout Process', code: 'CHK', description: 'Cart and payment processing', testcaseCount: 4 }
   });
 
   // 6. Testcases for Features
@@ -71,6 +74,8 @@ async function main() {
     await prisma.masterTestcase.create({
       data: { 
         moduleId: moduleAuth.id, 
+        testcaseId: `AUTH-${String(i+1).padStart(3, '0')}`,
+        createdById: users[0].id,
         title: authTestcases[i].title, 
         expectedResult: authTestcases[i].expectedResult, 
         sequence: i + 1,
@@ -98,6 +103,8 @@ async function main() {
     await prisma.masterTestcase.create({
       data: { 
         moduleId: moduleCart.id, 
+        testcaseId: `CAT-${String(i+1).padStart(3, '0')}`,
+        createdById: users[1].id,
         title: cartTestcases[i].title, 
         expectedResult: cartTestcases[i].expectedResult, 
         sequence: i + 1,
@@ -124,6 +131,8 @@ async function main() {
     await prisma.masterTestcase.create({
       data: { 
         moduleId: moduleCheckout.id, 
+        testcaseId: `CHK-${String(i+1).padStart(3, '0')}`,
+        createdById: users[0].id,
         title: checkoutTestcases[i].title, 
         expectedResult: checkoutTestcases[i].expectedResult, 
         sequence: i + 1,

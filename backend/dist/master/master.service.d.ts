@@ -17,8 +17,8 @@ export declare class MasterService {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        code: string;
         description: string | null;
+        code: string;
     }[]>;
     getUsers(): Promise<{
         role: {
@@ -32,4 +32,63 @@ export declare class MasterService {
             claimHistories: number;
         };
     }[]>;
+    getUserRole(userId: string): Promise<string | undefined>;
+    createUser(data: any): Promise<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        roleId: number;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    updateUser(id: string, data: any): Promise<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        roleId: number;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    deleteUser(id: string): Promise<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        roleId: number;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    getRoles(): Promise<{
+        id: number;
+        name: string;
+    }[]>;
+    createRole(data: any): Promise<{
+        id: number;
+        name: string;
+    }>;
+    updateRole(id: number, data: any): Promise<{
+        id: number;
+        name: string;
+    }>;
+    deleteRole(id: number): Promise<{
+        id: number;
+        name: string;
+    }>;
+    createStatus(data: any): Promise<{
+        id: number;
+        name: string;
+    }>;
+    updateStatus(id: number, data: any): Promise<{
+        id: number;
+        name: string;
+    }>;
+    deleteStatus(id: number): Promise<{
+        id: number;
+        name: string;
+    }>;
 }

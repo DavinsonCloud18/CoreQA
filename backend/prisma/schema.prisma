@@ -26,11 +26,14 @@ model User {
   name             String
   roleId           Int
   role             Role               @relation(fields: [roleId], references: [id])
-  isActive         Boolean            @default(true)
+  isActive         Boolean                @default(true)
   executions       SessionExecution[]
   claimHistories   ClaimHistory[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  createdTestcases MasterTestcase[]       @relation("TestcaseCreator")
+  updatedTestcases MasterTestcase[]       @relation("TestcaseUpdater")
+  notifications    TestcaseNotification[]
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 
   @@index([roleId])
   @@map("users")
@@ -63,6 +66,7 @@ model Module {
   code           String           @unique
   name           String
   description    String?
+  testcaseCount  Int              @default(0)
   testcases      MasterTestcase[]
   sessionModules SessionModule[]
   claimHistories ClaimHistory[]
@@ -73,19 +77,34 @@ model Module {
 }
 
 model MasterTestcase {
-  id             String             @id @default(uuid())
+  id             String                 @id @default(uuid())
+  testcaseId     String                 @unique
   moduleId       String
-  module         Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module         Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   title          String
   description    String?
+  precondition   String?
   expectedResult String?
-  sequence       Int                @default(0)
+  sequence       Int                    @default(0)
+  priority       String                 @default("Medium")
+  
+  createdById    String?
+  createdBy      User?                  @relation("TestcaseCreator", fields: [createdById], references: [id])
+  updatedById    String?
+  updatedBy      User?                  @relation("TestcaseUpdater", fields: [updatedById], references: [id])
+  
+  isDeleted      Boolean                @default(false)
+  deletedAt      DateTime?
+
   steps          TestcaseStep[]
   executions     SessionExecution[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  notifications  TestcaseNotification[]
+  
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
 
   @@index([moduleId])
+  @@index([createdById])
   @@map("master_testcases")
 }
 
@@ -198,4 +217,19 @@ model SessionStepExecution {
   @@index([stepId])
   @@index([statusId])
   @@map("session_step_executions")
+}
+
+model TestcaseNotification {
+  id          String         @id @default(uuid())
+  testcaseId  String
+  testcase    MasterTestcase @relation(fields: [testcaseId], references: [id], onDelete: Cascade)
+  userId      String         
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message     String
+  isRead      Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+
+  @@index([userId])
+  @@index([testcaseId])
+  @@map("testcase_notifications")
 }

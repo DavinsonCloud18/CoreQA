@@ -15,7 +15,7 @@ let AnalyticsService = class AnalyticsService {
         this.prisma = prisma;
     }
     async getGlobalAnalytics(sessionId) {
-        const whereClause = sessionId ? { sessionId } : {};
+        const whereClause = sessionId ? { sessionId } : { session: { isOpen: true } };
         const statusCounts = await this.prisma.sessionExecution.groupBy({
             by: ['statusId'],
             where: whereClause,
@@ -30,7 +30,7 @@ let AnalyticsService = class AnalyticsService {
             return acc;
         }, {});
         const claimHistories = await this.prisma.claimHistory.findMany({
-            where: sessionId ? { sessionId, isActive: true } : { isActive: true },
+            where: sessionId ? { sessionId, isActive: true } : { isActive: true, session: { isOpen: true } },
             include: {
                 claimedBy: { select: { id: true, name: true, email: true } },
                 module: { select: { id: true, name: true } },
@@ -58,6 +58,10 @@ let AnalyticsService = class AnalyticsService {
         };
     }
     async getSessionAnalytics(sessionId) {
+        const session = await this.prisma.session.findUnique({
+            where: { id: sessionId },
+            select: { id: true, name: true, status: true, isOpen: true }
+        });
         const statusCounts = await this.prisma.sessionExecution.groupBy({
             by: ['statusId'],
             where: { sessionId },
@@ -81,13 +85,14 @@ let AnalyticsService = class AnalyticsService {
       JOIN master_testcases mt ON se."testcaseId" = mt.id
       JOIN modules m ON mt."moduleId" = m.id
       JOIN statuses s ON se."statusId" = s.id
-      WHERE se."sessionId" = CAST(${sessionId} AS UUID)
+      WHERE se."sessionId" = ${sessionId}
       GROUP BY mt."moduleId", m.name
       HAVING SUM(CASE WHEN s.name = 'FAILED' THEN 1 ELSE 0 END) > 0
       ORDER BY "failedRate" DESC
       LIMIT 5;
     `;
         return {
+            session,
             summary: { ...summary, total: totalExecutions },
             topFailedModules,
         };

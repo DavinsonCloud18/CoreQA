@@ -42,4 +42,18 @@ export declare class SessionsController {
             statusBreakdown: Record<string, number>;
         }[];
     }>;
+    updateSessionStatus(sessionId: string, status: string): Promise<{
+        message: string;
+        data: {
+            status: string;
+            id: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+            environmentId: number;
+            isOpen: boolean;
+            startDate: Date;
+            endDate: Date | null;
+        };
+    }>;
 }

@@ -9,6 +9,12 @@ export declare class AnalyticsService {
         userAssignments: any[];
     }>;
     getSessionAnalytics(sessionId: string): Promise<{
+        session: {
+            status: string;
+            id: string;
+            name: string;
+            isOpen: boolean;
+        } | null;
         summary: {
             total: number;
         };

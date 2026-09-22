@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import * as bcrypt from 'bcrypt';
 let MasterService = class MasterService {
     prisma;
     constructor(prisma) {
@@ -55,6 +56,66 @@ let MasterService = class MasterService {
             },
             orderBy: { name: 'asc' }
         });
+    }
+    async getUserRole(userId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { role: true }
+        });
+        return user?.role?.name;
+    }
+    async createUser(data) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(data.password, salt);
+        return this.prisma.user.create({
+            data: {
+                email: data.email,
+                name: data.name,
+                password: hashedPassword,
+                roleId: Number(data.roleId),
+                isActive: data.isActive ?? true,
+            }
+        });
+    }
+    async updateUser(id, data) {
+        const updateData = { ...data };
+        if (updateData.roleId)
+            updateData.roleId = Number(updateData.roleId);
+        if (typeof updateData.password === 'string' && updateData.password.trim() !== '') {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(updateData.password, salt);
+        }
+        else {
+            delete updateData.password;
+        }
+        return this.prisma.user.update({
+            where: { id },
+            data: updateData
+        });
+    }
+    async deleteUser(id) {
+        return this.prisma.user.delete({ where: { id } });
+    }
+    async getRoles() {
+        return this.prisma.role.findMany({ orderBy: { id: 'asc' } });
+    }
+    async createRole(data) {
+        return this.prisma.role.create({ data });
+    }
+    async updateRole(id, data) {
+        return this.prisma.role.update({ where: { id }, data });
+    }
+    async deleteRole(id) {
+        return this.prisma.role.delete({ where: { id } });
+    }
+    async createStatus(data) {
+        return this.prisma.status.create({ data });
+    }
+    async updateStatus(id, data) {
+        return this.prisma.status.update({ where: { id }, data });
+    }
+    async deleteStatus(id) {
+        return this.prisma.status.delete({ where: { id } });
     }
 };
 MasterService = __decorate([

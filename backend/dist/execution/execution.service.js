@@ -14,6 +14,39 @@ let ExecutionService = class ExecutionService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async checkAndFinishSession(sessionId) {
+        const executions = await this.prisma.sessionExecution.findMany({
+            where: { sessionId },
+            include: { status: true }
+        });
+        const unpassed = executions.filter(e => {
+            const s = e.status.name.toUpperCase();
+            return s !== 'PASSED' && s !== 'PASSED WITH NOTES' && s !== 'DROPPED';
+        });
+        if (unpassed.length === 0 && executions.length > 0) {
+            await this.prisma.session.update({
+                where: { id: sessionId },
+                data: { status: 'Finished', isOpen: false, endDate: new Date() }
+            });
+        }
+    }
+    async validateModuleClaim(sessionId, testcaseId, userId) {
+        const testcase = await this.prisma.masterTestcase.findUnique({
+            where: { id: testcaseId },
+            select: { moduleId: true }
+        });
+        if (!testcase)
+            throw new NotFoundException('Testcase tidak ditemukan.');
+        const claim = await this.prisma.claimHistory.findFirst({
+            where: { sessionId, moduleId: testcase.moduleId, isActive: true }
+        });
+        if (!claim) {
+            throw new BadRequestException('Module harus di-claim sebelum testcase dapat dieksekusi.');
+        }
+        if (claim.claimedById !== userId) {
+            throw new BadRequestException('Hanya user yang melakukan claim pada module ini yang dapat mengeksekusi testcase-nya.');
+        }
+    }
     async getSessionExecutions(sessionId, query) {
         const page = query.page || 1;
         const limit = query.limit || 20;
@@ -35,7 +68,11 @@ let ExecutionService = class ExecutionService {
                     session: { select: { name: true } },
                     testcase: {
                         include: {
-                            module: { select: { name: true, code: true } },
+                            module: {
+                                include: {
+                                    claimHistories: { where: { isActive: true } }
+                                }
+                            },
                             steps: { orderBy: { sequence: 'asc' } }
                         }
                     },
@@ -74,6 +111,14 @@ let ExecutionService = class ExecutionService {
         });
     }
     async updateExecutionStatus(sessionId, testcaseId, userId, dto) {
+        const session = await this.prisma.session.findUnique({
+            where: { id: sessionId },
+            select: { status: true }
+        });
+        if (session?.status === 'Finished' || session?.status === 'Done') {
+            throw new BadRequestException('Session telah selesai (Finished) dan tidak dapat diubah lagi. Silakan Reopen Session jika ingin melakukan perubahan.');
+        }
+        await this.validateModuleClaim(sessionId, testcaseId, userId);
         const targetStatus = await this.prisma.status.findUnique({
             where: { id: dto.statusId }
         });
@@ -121,9 +166,18 @@ let ExecutionService = class ExecutionService {
                 }
             }
         }
+        await this.checkAndFinishSession(sessionId);
         return execution;
     }
     async updateStepExecutionStatus(sessionId, testcaseId, stepId, userId, dto) {
+        const session = await this.prisma.session.findUnique({
+            where: { id: sessionId },
+            select: { status: true }
+        });
+        if (session?.status === 'Finished' || session?.status === 'Done') {
+            throw new BadRequestException('Session telah selesai (Finished) dan tidak dapat diubah lagi. Silakan Reopen Session jika ingin melakukan perubahan.');
+        }
+        await this.validateModuleClaim(sessionId, testcaseId, userId);
         const targetStatus = await this.prisma.status.findUnique({
             where: { id: dto.statusId }
         });
@@ -188,6 +242,7 @@ let ExecutionService = class ExecutionService {
                 }
             }
         }
+        await this.checkAndFinishSession(sessionId);
         return stepExecution;
     }
 };

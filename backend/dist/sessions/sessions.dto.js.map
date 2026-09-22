@@ -1,1 +1,1 @@
-{"version":3,"file":"sessions.dto.js","sourceRoot":"","sources":["../../src/sessions/sessions.dto.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,gBAAgB;IAC3B,IAAI,CAAS;IACb,aAAa,CAAS;IACtB,SAAS,CAAW;CACrB"}
+{"version":3,"file":"sessions.dto.js","sourceRoot":"","sources":["../../src/sessions/sessions.dto.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,gBAAgB;IAC3B,IAAI,CAAS;IACb,aAAa,CAAS;IACtB,SAAS,CAAW;IACpB,SAAS,CAAU;IACnB,OAAO,CAAU;IACjB,WAAW,CAA0B;CACtC"}

@@ -1,13 +1,24 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { CreateSessionModal } from './CreateSessionModal';
 
 export function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const authData = localStorage.getItem('auth');
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        setCurrentUser(parsed.user);
+      } catch (e) {}
+    }
+  }, []);
 
   const getLinkClasses = (path: string) => {
     // Exact match for dashboard, partial match for others
@@ -20,7 +31,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="relative z-10 w-72 h-screen border-r border-white/20 bg-white/5 backdrop-blur-2xl flex flex-col pt-8 pb-4">
+    <div className="relative z-10 w-72 h-screen border-r border-white/20 bg-white/5  flex flex-col pt-8 pb-4">
       <div className="px-8 mb-12 flex items-center gap-3">
         <div className="w-12 h-12 bg-gradient-to-tr from-rose-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30">
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -31,7 +42,7 @@ export function Sidebar() {
       <nav className="flex-1 px-4 space-y-2">
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="w-full flex items-center justify-center gap-3 px-5 py-4 mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] transition-all"
+          className="w-full flex items-center justify-center gap-3 px-5 py-4 mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50  transition-all"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
           New Session
@@ -50,22 +61,40 @@ export function Sidebar() {
           <svg className={`w-5 h-5 ${!pathname?.startsWith('/dashboard/team') ? 'group-hover:scale-110 transition-transform' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           <span className="font-medium text-lg">Team</span>
         </Link>
+        <Link href="/dashboard/modules" className={getLinkClasses('/dashboard/modules')}>
+          <svg className={`w-5 h-5 ${!pathname?.startsWith('/dashboard/modules') ? 'group-hover:scale-110 transition-transform' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          <span className="font-medium text-lg">Modules</span>
+        </Link>
+        <Link href="/dashboard/testcases" className={getLinkClasses('/dashboard/testcases')}>
+          <svg className={`w-5 h-5 ${!pathname?.startsWith('/dashboard/testcases') ? 'group-hover:scale-110 transition-transform' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+          <span className="font-medium text-lg">Testcases</span>
+        </Link>
         <Link href="#" className={getLinkClasses('/dashboard/settings')}>
           <svg className={`w-5 h-5 ${!pathname?.startsWith('/dashboard/settings') ? 'group-hover:scale-110 transition-transform' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
           <span className="font-medium text-lg">Settings</span>
         </Link>
       </nav>
 
-      <div className="p-4 mx-4 mb-2 bg-black/20 rounded-2xl border border-white/5 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center border-2 border-white/20 shadow-md">
-             <span className="text-sm font-bold text-white">AD</span>
-           </div>
-           <div className="flex flex-col">
-             <span className="text-sm font-semibold text-white">Admin User</span>
-             <span className="text-xs text-indigo-200/70 font-medium">admin@coreqa.com</span>
-           </div>
-        </div>
+      <div className="p-4 mx-4 mb-2 bg-black/20 rounded-2xl border border-white/5 ">
+        {currentUser ? (
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center border-2 border-white/20 shadow-md">
+               <span className="text-sm font-bold text-white">{currentUser.name.substring(0,2).toUpperCase()}</span>
+             </div>
+             <div className="flex flex-col">
+               <span className="text-sm font-semibold text-white">{currentUser.name}</span>
+               <span className="text-xs text-indigo-200/70 font-medium">{currentUser.email}</span>
+             </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 animate-pulse">
+             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border-2 border-white/20 shadow-md"></div>
+             <div className="flex flex-col gap-2">
+               <div className="w-24 h-4 bg-white/10 rounded"></div>
+               <div className="w-32 h-3 bg-white/10 rounded"></div>
+             </div>
+          </div>
+        )}
       </div>
 
       <CreateSessionModal 

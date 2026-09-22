@@ -35,4 +35,15 @@ export declare class SessionsService {
         isClaimed: boolean;
         statusBreakdown: Record<string, number>;
     }[]>;
+    updateSessionStatus(sessionId: string, status: string): Promise<{
+        status: string;
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        environmentId: number;
+        isOpen: boolean;
+        startDate: Date;
+        endDate: Date | null;
+    }>;
 }

@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export function SessionSelector({ currentSession }: { currentSession?: string }) {
   const [sessions, setSessions] = useState<{id: string, name: string}[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const router = useRouter();
-
   const pathname = usePathname();
 
   useEffect(() => {
@@ -16,8 +20,19 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
       .catch(err => console.error(err));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelect = (val: string) => {
+    setIsOpen(false);
+    setSearchQuery('');
     if (val) {
       router.push(`${pathname}?session=${val}`);
     } else {
@@ -25,36 +40,81 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
     }
   };
 
+  const filteredSessions = sessions.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const currentSessionName = currentSession ? sessions.find(s => s.id === currentSession)?.name || 'Unknown Session' : 'Active Sessions';
+
   return (
-    <div className="relative group inline-block">
-      {/* Hover Glow Effect */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
-      
-      <div className="relative flex items-center bg-[#0f1117] border border-indigo-500/30 rounded-xl overflow-hidden cursor-pointer shadow-lg">
+    <div className="relative group inline-block z-50" ref={dropdownRef}>
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative flex items-center bg-[#0f1117] border border-indigo-500/30 hover:border-indigo-400/80 rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-[300px]"
+      >
         {/* Context Icon */}
-        <div className="pl-4 pr-3 py-2.5 flex items-center justify-center text-indigo-400 bg-indigo-500/10 border-r border-indigo-500/20">
+        <div className="pl-4 pr-3 py-3 flex items-center justify-center text-indigo-400 bg-indigo-500/10 border-r border-indigo-500/20">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
         </div>
         
-        {/* Select Dropdown */}
-        <select 
-          className="w-full bg-transparent pl-4 pr-10 py-2.5 text-white font-bold text-sm tracking-wide focus:outline-none appearance-none min-w-[240px] cursor-pointer"
-          value={currentSession || ''}
-          onChange={handleChange}
-        >
-          <option value="" className="bg-slate-900 font-normal text-white/50">All Sessions</option>
-          {sessions.map(s => (
-            <option key={s.id} value={s.id} className="bg-slate-900 text-white font-semibold py-2">
-              {s.name}
-            </option>
-          ))}
-        </select>
+        {/* Selected Value */}
+        <div className="flex-1 px-4 py-3 text-white font-bold text-sm tracking-wide truncate">
+          {currentSessionName}
+        </div>
         
         {/* Custom Chevron */}
-        <div className="absolute right-3 pointer-events-none text-indigo-400 group-hover:text-white transition-colors duration-300">
+        <div className={`absolute right-3 pointer-events-none ${isOpen ? 'text-white rotate-180' : 'text-indigo-400 group-hover:text-white'}`}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
         </div>
       </div>
+
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute top-full mt-2 w-full bg-slate-900 border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-2 border-b border-white/10 bg-black/20">
+            <div className="relative">
+              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <input 
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search sessions..."
+                className="w-full bg-black/30 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+          
+          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            <div 
+              onClick={() => handleSelect('')}
+              className={`px-4 py-3 text-sm cursor-pointer transition-colors ${!currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-normal'}`}
+            >
+              Active Sessions
+            </div>
+            
+            {filteredSessions.length > 0 ? (
+              <>
+                {filteredSessions.slice(0, 10).map(s => (
+                  <div 
+                    key={s.id}
+                    onClick={() => handleSelect(s.id)}
+                    className={`px-4 py-3 text-sm cursor-pointer transition-colors ${s.id === currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-semibold'}`}
+                  >
+                    {s.name}
+                  </div>
+                ))}
+                {filteredSessions.length > 10 && (
+                  <div className="px-4 py-3 text-xs text-center text-white/40 italic bg-black/20">
+                    + {filteredSessions.length - 10} more sessions. Type to refine.
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="px-4 py-8 text-center text-sm text-white/40">
+                No sessions found
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

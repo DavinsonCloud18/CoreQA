@@ -15,6 +15,24 @@ export declare class MasterController {
             name: string;
         }[];
     }>;
+    createStatus(data: any): Promise<{
+        data: {
+            id: number;
+            name: string;
+        };
+    }>;
+    updateStatus(id: string, data: any): Promise<{
+        data: {
+            id: number;
+            name: string;
+        };
+    }>;
+    deleteStatus(id: string): Promise<{
+        data: {
+            id: number;
+            name: string;
+        };
+    }>;
     getModules(): Promise<{
         data: {
             testcaseCount: number;
@@ -22,8 +40,8 @@ export declare class MasterController {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            code: string;
             description: string | null;
+            code: string;
         }[];
     }>;
     getUsers(): Promise<{
@@ -39,5 +57,65 @@ export declare class MasterController {
                 claimHistories: number;
             };
         }[];
+    }>;
+    createUser(data: any, req: any): Promise<{
+        data: {
+            email: string;
+            password: string;
+            id: string;
+            name: string;
+            roleId: number;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    }>;
+    updateUser(id: string, data: any, req: any): Promise<{
+        data: {
+            email: string;
+            password: string;
+            id: string;
+            name: string;
+            roleId: number;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    }>;
+    deleteUser(id: string, req: any): Promise<{
+        data: {
+            email: string;
+            password: string;
+            id: string;
+            name: string;
+            roleId: number;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    }>;
+    getRoles(): Promise<{
+        data: {
+            id: number;
+            name: string;
+        }[];
+    }>;
+    createRole(data: any): Promise<{
+        data: {
+            id: number;
+            name: string;
+        };
+    }>;
+    updateRole(id: string, data: any): Promise<{
+        data: {
+            id: number;
+            name: string;
+        };
+    }>;
+    deleteRole(id: string): Promise<{
+        data: {
+            id: number;
+            name: string;
+        };
     }>;
 }

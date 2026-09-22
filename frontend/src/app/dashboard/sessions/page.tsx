@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { LogoutButton } from '@/components/dashboard/LogoutButton';
+import { NotificationBell } from '@/components/dashboard/NotificationBell';
 import Link from 'next/link';
 
 async function fetchSessions() {
@@ -33,12 +34,12 @@ export default async function SessionsHistoryPage() {
   );
 
   return (
-    <div className="min-h-screen relative flex bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000')] bg-cover bg-center bg-fixed">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[20px]"></div>
+    <div className="min-h-screen relative flex bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      
       <Sidebar />
       <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[2rem] shadow-2xl">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10  border border-white/20 p-6 rounded-[2rem] shadow-2xl">
             <div>
               <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">Execution Log</h1>
               <p className="text-indigo-200 font-medium text-sm mt-0.5">Manage and view all testing sessions</p>
@@ -46,7 +47,7 @@ export default async function SessionsHistoryPage() {
             <LogoutButton />
           </header>
 
-          <section className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+          <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -66,11 +67,13 @@ export default async function SessionsHistoryPage() {
                     const total = summary.total || 0;
                     const passed = summary['PASSED'] || 0;
                     const passedNotes = summary['PASSED WITH NOTES'] || 0;
+                    const dropped = summary['DROPPED'] || 0;
                     const todo = summary['TO DO'] || 0;
                     const completed = total - todo;
+                    const effectiveTotal = total - dropped;
                     
                     const completionPct = total > 0 ? Math.round((completed / total) * 100) : 0;
-                    const passRate = total > 0 ? Math.round(((passed + passedNotes) / total) * 100) : 0;
+                    const passRate = effectiveTotal > 0 ? Math.round(((passed + passedNotes) / effectiveTotal) * 100) : 0;
 
                     return (
                     <tr key={session.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
@@ -86,7 +89,7 @@ export default async function SessionsHistoryPage() {
                       </td>
                       <td className="py-4 px-6">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                          session.status === 'Finished' || session.status === 'Done' ? 'bg-emerald-500/20 text-emerald-400' :
+                          session.status === 'Finished' ? 'bg-emerald-500/20 text-emerald-400' :
                           session.status === 'On Progress' ? 'bg-amber-500/20 text-amber-400' :
                           'bg-slate-500/20 text-slate-400'
                         }`}>

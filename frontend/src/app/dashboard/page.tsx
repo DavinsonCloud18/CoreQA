@@ -3,6 +3,7 @@ import { LogoutButton } from '@/components/dashboard/LogoutButton';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { UserAssignments } from '@/components/dashboard/UserAssignments';
 import { SessionSelector } from '@/components/dashboard/SessionSelector';
+import { NotificationBell } from '@/components/dashboard/NotificationBell';
 import { ExecutionChart } from '@/components/dashboard/ExecutionChart';
 import { ModuleList } from '@/components/dashboard/ModuleList';
 
@@ -83,14 +84,14 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
   }
   
   return (
-    <div className="min-h-screen relative flex bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000')] bg-cover bg-center bg-fixed">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[20px]"></div>
+    <div className="min-h-screen relative flex bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      
 
       <Sidebar />
 
       <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[2rem] shadow-2xl">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10  border border-white/20 p-6 rounded-[2rem] shadow-2xl">
             <div className="flex-1">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -104,6 +105,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
             </div>
             
             <div className="flex items-center gap-4">
+               <NotificationBell />
                <SessionSelector currentSession={resolvedParams.session} />
                <LogoutButton />
             </div>
@@ -114,7 +116,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
           {!isSingleSessionMode ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {activeSessionsWithAnalytics.map(session => (
-                <section key={session.id} className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center">
+                <section key={session.id} className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center">
                   <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none"></div>
                   
                   <div className="w-full flex justify-between items-start mb-6 relative z-10">
@@ -162,7 +164,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Chart on the left */}
-              <section className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
+              <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
                 <div className="w-full flex flex-col items-start mb-8 relative z-10">
                   <h2 className="text-xl font-bold text-white mb-2">
                     Execution Status Distribution
@@ -192,7 +194,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
               </section>
 
               {/* User assignments on the right */}
-              <section className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+              <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
                 <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none"></div>
                 <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
                   <span className="w-2 h-6 bg-indigo-500 rounded-full inline-block shadow-[0_0_10px_rgba(99,102,241,0.6)]"></span>

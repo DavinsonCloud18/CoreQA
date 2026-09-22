@@ -1,0 +1,99 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export function NotificationBell() {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  const fetchNotifications = async () => {
+    try {
+      const authData = localStorage.getItem('auth');
+      if (!authData) return;
+      const { access_token } = JSON.parse(authData);
+      
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const res = await fetch(`${baseUrl}/testcases/notifications`, {
+        headers: { 'Authorization': `Bearer ${access_token}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setNotifications(json.data || []);
+      }
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000); // poll every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleNotificationClick = async (notif: any) => {
+    if (!notif.isRead) {
+      try {
+        const authData = localStorage.getItem('auth');
+        const { access_token } = JSON.parse(authData || '{}');
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+        await fetch(`${baseUrl}/testcases/notifications/${notif.id}/read`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${access_token}` }
+        });
+        fetchNotifications();
+      } catch(err) {}
+    }
+    setIsOpen(false);
+    router.push(`/dashboard/testcases?highlight=${notif.testcaseId}`);
+  };
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors shadow-lg"
+      >
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+        {unreadCount > 0 && (
+          <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center border border-slate-900 shadow-md animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+          <div className="p-4 border-b border-white/10 flex justify-between items-center bg-slate-800/80 backdrop-blur-sm">
+            <h3 className="font-bold text-white">Notifications</h3>
+            {unreadCount > 0 && (
+              <span className="text-xs text-indigo-300 font-medium">{unreadCount} unread</span>
+            )}
+          </div>
+          <div className="max-h-96 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <div className="p-8 text-center text-white/50 text-sm">No notifications yet.</div>
+            ) : (
+              notifications.map((notif: any) => (
+                <div 
+                  key={notif.id} 
+                  onClick={() => handleNotificationClick(notif)}
+                  className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors ${!notif.isRead ? 'bg-indigo-500/10' : ''}`}
+                >
+                  <p className={`text-sm ${!notif.isRead ? 'text-white font-medium' : 'text-white/70'}`}>
+                    {notif.message}
+                  </p>
+                  <p className="text-[10px] text-white/40 mt-1">
+                    {new Date(notif.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

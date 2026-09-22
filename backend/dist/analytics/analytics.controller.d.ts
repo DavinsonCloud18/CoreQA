@@ -14,6 +14,12 @@ export declare class AnalyticsController {
     getAnalytics(sessionId: string): Promise<{
         message: string;
         data: {
+            session: {
+                status: string;
+                id: string;
+                name: string;
+                isOpen: boolean;
+            } | null;
             summary: {
                 total: number;
             };

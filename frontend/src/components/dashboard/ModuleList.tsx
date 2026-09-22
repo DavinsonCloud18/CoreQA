@@ -7,14 +7,13 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + '/master/users' || 'http://localhost:4000/master/users')
-      .then(res => res.json())
-      .then(json => {
-        if (json.data && json.data.length > 0) {
-          setCurrentUser(json.data[0]); // Using first user for prototype
-        }
-      })
-      .catch(e => console.error(e));
+    const authData = localStorage.getItem('auth');
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        setCurrentUser(parsed.user);
+      } catch (e) {}
+    }
   }, []);
 
   const handleClaim = async (e: React.MouseEvent, moduleId: string) => {
@@ -23,9 +22,13 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
     if (!currentUser) return alert('No user available to claim module');
 
     try {
+      const authData = JSON.parse(localStorage.getItem('auth') || '{}');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/sessions/${sessionId}/modules/${moduleId}/claim`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authData.access_token}`
+        },
         body: JSON.stringify({ userId: currentUser.id })
       });
       
@@ -55,7 +58,7 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
         <Link 
           href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`}
           key={m.id}
-          className="group p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 shadow-xl hover:shadow-indigo-500/20 hover:border-indigo-400/50 transition-all relative overflow-hidden flex flex-col justify-between"
+          className="group p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-white/10  border border-white/20 shadow-xl hover:shadow-indigo-500/20 hover:border-indigo-400/50 transition-all relative overflow-hidden flex flex-col justify-between"
         >
           <div className="absolute -top-16 -right-16 w-32 h-32 bg-indigo-500/20 blur-[40px] rounded-full group-hover:bg-indigo-400/40 transition-all duration-500"></div>
           
@@ -101,6 +104,11 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
                 {m.statusBreakdown?.['TO DO'] > 0 && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     TO DO: {m.statusBreakdown['TO DO']}
+                  </span>
+                )}
+                {m.statusBreakdown?.['DROPPED'] > 0 && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-zinc-500/20 text-zinc-300 border border-zinc-500/30">
+                    Dropped: {m.statusBreakdown['DROPPED']}
                   </span>
                 )}
               </div>

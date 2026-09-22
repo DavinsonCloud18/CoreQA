@@ -3,6 +3,8 @@ import { GetTestcasesQueryDto, UpdateExecutionStatusDto } from './execution.dto.
 export declare class ExecutionService {
     private prisma;
     constructor(prisma: PrismaService);
+    private checkAndFinishSession;
+    private validateModuleClaim;
     getSessionExecutions(sessionId: string, query: GetTestcasesQueryDto): Promise<{
         metadata: {
             total: number;
@@ -20,14 +22,28 @@ export declare class ExecutionService {
             };
             testcase: {
                 module: {
+                    claimHistories: {
+                        id: string;
+                        isActive: boolean;
+                        moduleId: string;
+                        sessionId: string;
+                        claimedById: string;
+                        claimedAt: Date;
+                    }[];
+                } & {
+                    id: string;
                     name: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    description: string | null;
                     code: string;
+                    testcaseCount: number;
                 };
                 steps: {
                     id: string;
                     testcaseId: string;
-                    sequence: number;
                     expectedResult: string;
+                    sequence: number;
                     action: string;
                 }[];
             } & {
@@ -35,10 +51,17 @@ export declare class ExecutionService {
                 createdAt: Date;
                 updatedAt: Date;
                 moduleId: string;
-                description: string | null;
-                sequence: number;
+                testcaseId: string;
                 title: string;
+                description: string | null;
+                precondition: string | null;
                 expectedResult: string | null;
+                sequence: number;
+                priority: string;
+                createdById: string | null;
+                updatedById: string | null;
+                isDeleted: boolean;
+                deletedAt: Date | null;
             };
             executedBy: {
                 id: string;

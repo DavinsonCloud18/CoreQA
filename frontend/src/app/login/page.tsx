@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('qa1@coreqa.com');
-  const [password, setPassword] = useState('password123');
+  const [password, setPassword] = useState('CoreQA_2026!Sec');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -30,7 +30,8 @@ export default function LoginPage() {
       }
 
       document.cookie = `coreqa_token=${json.data.access_token}; path=/; max-age=86400; secure; samesite=strict`;
-      router.push('/dashboard/sessions/123e4567-e89b-12d3-a456-426614174000');
+      localStorage.setItem('auth', JSON.stringify(json.data));
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -39,10 +40,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000')] bg-cover bg-center">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
       
-      <div className="relative z-10 w-full max-w-md p-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-2xl">
+      
+      <div className="relative z-10 w-full max-w-md p-8 bg-white/10  border border-white/20 rounded-[2rem] shadow-2xl">
         <div className="mb-8 text-center">
           <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-4">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>

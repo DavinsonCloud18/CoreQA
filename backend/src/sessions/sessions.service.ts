@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateSessionDto } from './sessions.dto.js';
 
@@ -27,6 +27,8 @@ export class SessionsService {
           name: dto.name,
           environmentId: Number(dto.environmentId),
           status: 'TO DO',
+          ...(dto.startDate && { startDate: new Date(dto.startDate) }),
+          ...(dto.endDate && { endDate: new Date(dto.endDate) }),
         }
       });
 
@@ -48,6 +50,16 @@ export class SessionsService {
             statusId: initialStatusId,
           }));
           await tx.sessionExecution.createMany({ data: executions });
+        }
+
+        if (dto.assignments && Object.keys(dto.assignments).length > 0) {
+          const claims = Object.entries(dto.assignments).map(([moduleId, userId]) => ({
+            sessionId: session.id,
+            moduleId,
+            claimedById: userId,
+            isActive: true,
+          }));
+          await tx.claimHistory.createMany({ data: claims });
         }
       }
 
@@ -112,6 +124,50 @@ export class SessionsService {
         isClaimed: !!claim,
         statusBreakdown
       };
+    });
+  }
+
+  async updateSessionStatus(sessionId: string, status: string) {
+    if (status.toUpperCase() === 'FINISHED') {
+      const executions = await this.prisma.sessionExecution.findMany({
+        where: { sessionId },
+        include: { status: true }
+      });
+      
+      const unpassed = executions.filter(e => {
+        const s = e.status.name.toUpperCase();
+        return s !== 'PASSED' && s !== 'PASSED WITH NOTES' && s !== 'DROPPED';
+      });
+
+      if (unpassed.length > 0) {
+        throw new BadRequestException('Cannot mark session as Finished. All testcases must be Passed, Passed with Notes, or Dropped.');
+      }
+      
+      // Also update endDate if it's finished
+      return this.prisma.session.update({
+        where: { id: sessionId },
+        data: { 
+          status: 'Finished', 
+          isOpen: false,
+          endDate: new Date()
+        }
+      });
+    }
+
+    if (status.toUpperCase() === 'ON PROGRESS') {
+      return this.prisma.session.update({
+        where: { id: sessionId },
+        data: { 
+          status: 'On Progress',
+          isOpen: true,
+          endDate: null
+        }
+      });
+    }
+
+    return this.prisma.session.update({
+      where: { id: sessionId },
+      data: { status }
     });
   }
 }

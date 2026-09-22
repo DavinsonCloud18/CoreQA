@@ -3,11 +3,13 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export function ExecutionTable({ sessionId }: { sessionId: string }) {
+export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string, sessionStatus?: string }) {
   const [testcases, setTestcases] = useState<any[]>([]);
   const [modules, setModules] = useState<any[]>([]);
   const [statuses, setStatuses] = useState<any[]>([]);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
+  const isSessionLocked = sessionStatus === 'Finished';
   
   const searchParams = useSearchParams();
   const initialModuleId = searchParams.get('moduleId') || '';
@@ -24,23 +26,23 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
     statusId: number;
     notes: string;
   }>({ isOpen: false, type: 'TESTCASE', testcaseId: '', statusId: 0, notes: '' });
+  const [restrictionModal, setRestrictionModal] = useState<{isOpen: boolean, message: string}>({ isOpen: false, message: '' });
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
   useEffect(() => {
-    fetch(`${baseUrl}/master/users`)
-      .then(res => res.json())
-      .then(json => {
-        if (json.data && json.data.length > 0) {
-          setCurrentUser(json.data[0]); // Using first user for prototype
-        }
-      })
-      .catch(e => console.error(e));
+    const authData = localStorage.getItem('auth');
+    if (authData) {
+      setCurrentUser(JSON.parse(authData).user);
+    }
       
     // Fetch filter data
+    const authStr = JSON.parse(localStorage.getItem('auth') || '{}');
+    const headers = { 'Authorization': `Bearer ${authStr.access_token}` };
+    
     Promise.all([
-      fetch(`${baseUrl}/sessions/${sessionId}/modules`).then(res => res.json()),
-      fetch(`${baseUrl}/master/statuses`).then(res => res.json())
+      fetch(`${baseUrl}/sessions/${sessionId}/modules`, { headers, cache: 'no-store' }).then(res => res.json()),
+      fetch(`${baseUrl}/master/statuses`, { headers, cache: 'no-store' }).then(res => res.json())
     ]).then(([modData, statData]) => {
       setModules(modData.data || []);
       setStatuses(statData.data || []);
@@ -57,7 +59,9 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
     if (filterStatusId) url += `&statusId=${filterStatusId}`;
     
     try {
-      const res = await fetch(url);
+      const authStr = JSON.parse(localStorage.getItem('auth') || '{}');
+      const headers = { 'Authorization': `Bearer ${authStr.access_token}` };
+      const res = await fetch(url, { headers, cache: 'no-store' });
       const json = await res.json();
       setTestcases(json.data || []);
     } catch (e) {
@@ -73,9 +77,13 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
       : `${baseUrl}/sessions/${sessionId}/testcases/${tcId}/steps/${stepId}/status`;
 
     try {
+      const authStr = JSON.parse(localStorage.getItem('auth') || '{}');
       const res = await fetch(url, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authStr.access_token}`
+        },
         body: JSON.stringify({ statusId, notes, userId: currentUser.id })
       });
       
@@ -84,7 +92,11 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
         setNotesModal(prev => ({ ...prev, isOpen: false }));
       } else {
         const err = await res.json();
-        alert(err.message || 'Failed to update status');
+        if (res.status === 400 && err.message?.toLowerCase().includes('claim')) {
+          setRestrictionModal({ isOpen: true, message: err.message });
+        } else {
+          alert(err.message || 'Failed to update status');
+        }
       }
     } catch (e) {
       console.error(e);
@@ -92,33 +104,53 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
     }
   };
 
-  const handleStatusChange = async (testcaseId: string, statusId: number, currentStatusId: number) => {
+  const handleStatusChange = async (tc: any, statusId: number, currentStatusId: number) => {
     if (statusId === currentStatusId) return;
 
+    // Check frontend claim
+    const claim = tc.testcase?.module?.claimHistories?.find((c: any) => c.sessionId === sessionId);
+    if (!claim || claim.claimedById !== currentUser?.id) {
+      setRestrictionModal({ 
+        isOpen: true, 
+        message: !claim ? 'Module harus di-claim sebelum testcase dapat dieksekusi.' : 'Hanya user yang melakukan claim pada module ini yang dapat mengeksekusi testcase-nya.'
+      });
+      return;
+    }
+
     const status = statuses.find(s => s.id === statusId);
-    if (status && ['PASSED WITH NOTES', 'FAILED'].includes(status.name.toUpperCase())) {
+    if (status && ['PASSED WITH NOTES', 'FAILED', 'DROPPED'].includes(status.name.toUpperCase())) {
       setNotesModal({
         isOpen: true,
         type: 'TESTCASE',
-        testcaseId,
+        testcaseId: tc.testcaseId,
         statusId,
         notes: ''
       });
       return;
     }
 
-    await submitStatusUpdate('TESTCASE', testcaseId, undefined, statusId, '');
+    await submitStatusUpdate('TESTCASE', tc.testcaseId, undefined, statusId, '');
   };
 
-  const handleStepStatusChange = async (testcaseId: string, stepId: string, statusId: number, currentStatusId: number) => {
+  const handleStepStatusChange = async (tc: any, stepId: string, statusId: number, currentStatusId: number) => {
     if (statusId === currentStatusId) return;
 
+    // Check frontend claim
+    const claim = tc.testcase?.module?.claimHistories?.find((c: any) => c.sessionId === sessionId);
+    if (!claim || claim.claimedById !== currentUser?.id) {
+      setRestrictionModal({ 
+        isOpen: true, 
+        message: !claim ? 'Module harus di-claim sebelum testcase dapat dieksekusi.' : 'Hanya user yang melakukan claim pada module ini yang dapat mengeksekusi testcase-nya.'
+      });
+      return;
+    }
+
     const status = statuses.find(s => s.id === statusId);
-    if (status && ['PASSED WITH NOTES', 'FAILED'].includes(status.name.toUpperCase())) {
+    if (status && ['PASSED WITH NOTES', 'FAILED', 'DROPPED'].includes(status.name.toUpperCase())) {
       setNotesModal({
         isOpen: true,
         type: 'STEP',
-        testcaseId,
+        testcaseId: tc.testcaseId,
         stepId,
         statusId,
         notes: ''
@@ -126,7 +158,7 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
       return;
     }
 
-    await submitStatusUpdate('STEP', testcaseId, stepId, statusId, '');
+    await submitStatusUpdate('STEP', tc.testcaseId, stepId, statusId, '');
   };
 
   const getUniqueTcId = (tc: any) => {
@@ -228,12 +260,14 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
                   <td className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
                     <select
                       value={tc.statusId}
-                      onChange={(e) => handleStatusChange(tc.testcaseId, Number(e.target.value), tc.statusId)}
+                      onChange={(e) => handleStatusChange(tc, Number(e.target.value), tc.statusId)}
+                      disabled={isSessionLocked}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-slate-900 ${
                         tc.status.name.toUpperCase() === 'PASSED' ? 'border-emerald-500/50 text-emerald-400' :
                         tc.status.name.toUpperCase() === 'FAILED' ? 'border-rose-500/50 text-rose-400' :
                         tc.status.name.toUpperCase() === 'PASSED WITH NOTES' ? 'border-amber-500/50 text-amber-400' :
                         tc.status.name.toUpperCase() === 'BLOCKED' ? 'border-slate-500/50 text-slate-400' :
+                        tc.status.name.toUpperCase() === 'DROPPED' ? 'border-zinc-500/50 text-zinc-400' :
                         'border-white/20 text-white/70'
                       }`}
                     >
@@ -249,7 +283,7 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
                 {expandedRowId === tc.id && (
                   <tr className="bg-black/40 border-b border-white/10">
                     <td colSpan={5} className="p-0">
-                      <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner backdrop-blur-md">
+                      <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner ">
                         <h4 className="text-indigo-200 font-bold mb-4 flex items-center gap-2">
                           <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                           Test Steps
@@ -279,12 +313,14 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
                                   <div className="col-span-2 flex justify-center">
                                     <select
                                       value={stepStatusId}
-                                      onChange={(e) => handleStepStatusChange(tc.testcaseId, step.id, Number(e.target.value), stepStatusId)}
+                                      onChange={(e) => handleStepStatusChange(tc, step.id, Number(e.target.value), stepStatusId)}
+                                      disabled={isSessionLocked}
                                       className={`px-2 py-1 rounded-md text-[10px] font-bold border cursor-pointer focus:outline-none appearance-none bg-slate-900 w-full text-center ${
                                         stepStatusName.toUpperCase() === 'PASSED' ? 'border-emerald-500/50 text-emerald-400' :
                                         stepStatusName.toUpperCase() === 'FAILED' ? 'border-rose-500/50 text-rose-400' :
                                         stepStatusName.toUpperCase() === 'PASSED WITH NOTES' ? 'border-amber-500/50 text-amber-400' :
                                         stepStatusName.toUpperCase() === 'BLOCKED' ? 'border-slate-500/50 text-slate-400' :
+                                        stepStatusName.toUpperCase() === 'DROPPED' ? 'border-zinc-500/50 text-zinc-400' :
                                         'border-white/20 text-white/70'
                                       }`}
                                     >
@@ -324,16 +360,17 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
 
       {/* Notes Modal */}
       {notesModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4 animate-in fade-in duration-200">
           <div className="bg-[#0f1117] border border-white/10 rounded-2xl p-5 w-full max-w-sm shadow-2xl relative overflow-hidden">
             {/* Dynamic Styling based on Status */}
             {(() => {
               const statusName = statuses.find(s => s.id === notesModal.statusId)?.name?.toUpperCase() || '';
               const isFailed = statusName === 'FAILED';
-              const gradientClass = isFailed ? 'from-rose-500 to-rose-400' : 'from-amber-500 to-amber-400';
-              const ringClass = isFailed ? 'focus:ring-rose-500/50' : 'focus:ring-amber-500/50';
-              const btnClass = isFailed ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.2)]';
-              const badgeClass = isFailed ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+              const isDropped = statusName === 'DROPPED';
+              const gradientClass = isFailed ? 'from-rose-500 to-rose-400' : (isDropped ? 'from-zinc-500 to-zinc-400' : 'from-amber-500 to-amber-400');
+              const ringClass = isFailed ? 'focus:ring-rose-500/50' : (isDropped ? 'focus:ring-zinc-500/50' : 'focus:ring-amber-500/50');
+              const btnClass = isFailed ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-[0_0_15px_rgba(244,63,94,0.2)]' : (isDropped ? 'bg-zinc-500 hover:bg-zinc-400 text-white shadow-[0_0_15px_rgba(113,113,122,0.2)]' : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.2)]');
+              const badgeClass = isFailed ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : (isDropped ? 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30');
 
               return (
                 <>
@@ -376,6 +413,38 @@ export function ExecutionTable({ sessionId }: { sessionId: string }) {
                 </>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* Restriction Modal */}
+      {restrictionModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0f1117] border border-rose-500/30 rounded-2xl p-6 w-full max-w-md shadow-[0_0_50px_rgba(244,63,94,0.15)] relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-400"></div>
+            
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+                <svg className="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Access Denied</h3>
+                <p className="text-sm text-rose-200/70 mt-0.5">Claim Restriction</p>
+              </div>
+            </div>
+
+            <p className="text-white/80 text-sm leading-relaxed mb-6 bg-rose-950/20 p-4 rounded-xl border border-rose-900/30">
+              {restrictionModal.message}
+            </p>
+
+            <div className="flex justify-end">
+              <button 
+                onClick={() => setRestrictionModal({ isOpen: false, message: '' })}
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all text-sm"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

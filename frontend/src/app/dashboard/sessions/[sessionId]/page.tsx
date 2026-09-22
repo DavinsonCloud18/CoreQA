@@ -1,6 +1,7 @@
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { ModuleProgress } from '@/components/dashboard/ModuleProgress';
 import { LogoutButton } from '@/components/dashboard/LogoutButton';
+import { NotificationBell } from '@/components/dashboard/NotificationBell';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 
 async function fetchAnalytics(sessionId: string) {
@@ -18,16 +19,16 @@ export default async function DashboardPage({ params }: { params: Promise<{ sess
   const data = await fetchAnalytics(resolvedParams.sessionId);
   
   return (
-    <div className="min-h-screen relative flex bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000')] bg-cover bg-center bg-fixed">
+    <div className="min-h-screen relative flex bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
       {/* Dark overlay matching login page */}
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[20px]"></div>
+      
 
       <Sidebar />
 
       <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
         <div className="w-full space-y-8 pb-12">
           {/* Header */}
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[2rem] shadow-2xl">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10  border border-white/20 p-6 rounded-[2rem] shadow-2xl">
             <div>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -44,7 +45,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ sess
 
           <SummaryCards summary={data.summary} />
           
-          <section className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+          <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
             <div className="absolute -top-32 -right-32 w-64 h-64 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>
             <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
               <span className="w-2 h-6 bg-rose-500 rounded-full inline-block shadow-[0_0_10px_rgba(244,63,94,0.6)]"></span>
