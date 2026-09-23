@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { LogoutButton } from '@/components/dashboard/LogoutButton';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
+import { HeaderProfile } from '@/components/dashboard/HeaderProfile';
 import Link from 'next/link';
 
 async function fetchSessions() {
@@ -34,12 +35,12 @@ export default async function SessionsHistoryPage() {
   );
 
   return (
-    <div className="min-h-screen relative flex bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className="min-h-screen relative flex bg-slate-950">
       
       <Sidebar />
       <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10  border border-white/20 p-6 rounded-[2rem] shadow-2xl">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
             <div>
               <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">Execution Log</h1>
               <p className="text-indigo-200 font-medium text-sm mt-0.5">Manage and view all testing sessions</p>
@@ -47,11 +48,11 @@ export default async function SessionsHistoryPage() {
             <LogoutButton />
           </header>
 
-          <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-slate-800">
                     <th className="py-4 px-6 text-indigo-200 font-semibold">Name</th>
                     <th className="py-4 px-6 text-indigo-200 font-semibold">Environment</th>
                     <th className="py-4 px-6 text-indigo-200 font-semibold">Timeline</th>
@@ -76,10 +77,10 @@ export default async function SessionsHistoryPage() {
                     const passRate = effectiveTotal > 0 ? Math.round(((passed + passedNotes) / effectiveTotal) * 100) : 0;
 
                     return (
-                    <tr key={session.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                    <tr key={session.id} className="border-b border-slate-800 hover:bg-white/5 transition-colors group">
                       <td className="py-4 px-6 font-medium">{session.name}</td>
                       <td className="py-4 px-6">
-                        <span className="bg-white/10 px-2 py-1 rounded text-sm text-indigo-200">{session.environment.name}</span>
+                        <span className="bg-slate-900 px-2 py-1 rounded text-sm text-indigo-200">{session.environment.name}</span>
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex flex-col gap-1">
@@ -109,7 +110,7 @@ export default async function SessionsHistoryPage() {
                       <td className="py-4 px-6 text-right">
                         <Link 
                           href={`/dashboard/execution?session=${session.id}`}
-                          className="bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all inline-block"
+                          className="bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white px-4 py-2 rounded-lg text-sm font-semibold  inline-block"
                         >
                           View Session
                         </Link>

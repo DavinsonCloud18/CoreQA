@@ -40,44 +40,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
       
-      
-      <div className="relative z-10 w-full max-w-md p-8 bg-white/10  border border-white/20 rounded-[2rem] shadow-2xl">
+      <div className="relative z-10 w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-[2rem] shadow-lg">
         <div className="mb-8 text-center">
-          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <div className="w-14 h-14 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-sm mb-5">
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">CoreQA</h1>
-          <p className="text-white/60 mt-2 text-sm font-medium">Masuk untuk mengelola test execution</p>
+          <p className="text-slate-400 mt-2 text-sm font-medium">Masuk untuk mengelola test execution</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-500/20 border border-rose-500/50 rounded-xl text-rose-200 text-sm font-medium text-center">
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-sm font-medium text-center">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
             <input 
               type="email" 
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+              className="w-full bg-black/20 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
               placeholder="you@coreqa.com"
               required
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Password</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Password</label>
             <input 
               type="password" 
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+              className="w-full bg-black/20 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
               placeholder="••••••••"
               required
             />
@@ -86,15 +85,15 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-white text-indigo-900 font-bold py-3.5 rounded-xl hover:bg-indigo-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2"
+            className="w-full mt-2 bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2 transition-colors"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin"></span>
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             ) : 'Sign In'}
           </button>
         </form>
         
-        <div className="mt-8 text-center text-white/40 text-xs">
+        <div className="mt-8 text-center text-slate-600 text-xs font-semibold tracking-wide uppercase">
           Secure QA Orchestration Platform
         </div>
       </div>

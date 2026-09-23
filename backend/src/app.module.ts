@@ -9,9 +9,10 @@ import { MasterModule } from './master/master.module.js';
 import { SessionsModule } from './sessions/sessions.module.js';
 import { TestcasesModule } from './testcases/testcases.module.js';
 import { ModulesModule } from './modules/modules.module.js';
+import { TrashModule } from './trash/trash.module.js';
 
 @Module({
-  imports: [PrismaModule, AuthModule, ExecutionModule, AnalyticsModule, MasterModule, SessionsModule, TestcasesModule, ModulesModule],
+  imports: [PrismaModule, AuthModule, ExecutionModule, AnalyticsModule, MasterModule, SessionsModule, TestcasesModule, ModulesModule, TrashModule],
   controllers: [AppController],
   providers: [AppService],
 })

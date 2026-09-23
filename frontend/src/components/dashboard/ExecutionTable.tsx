@@ -193,11 +193,11 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
             placeholder="Search testcase..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/30 border border-white/20 rounded-xl pl-10 pr-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            className="w-full bg-black/30 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
           />
         </div>
         
-        <div className="flex items-center gap-2 bg-black/20 border border-white/10 p-1.5 rounded-xl w-full md:w-auto overflow-x-auto">
+        <div className="flex items-center gap-2 bg-slate-800 border border-slate-800 p-1.5 rounded-xl w-full md:w-auto overflow-x-auto">
           <div className="pl-3 pr-2 flex items-center gap-2 text-indigo-200">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
             <span className="text-sm font-semibold hidden md:block">Filters</span>
@@ -205,7 +205,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
           <select 
             value={filterModuleId}
             onChange={(e) => setFilterModuleId(e.target.value)}
-            className="bg-black/30 border border-white/20 rounded-lg px-4 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[150px] text-sm"
+            className="bg-black/30 border border-slate-700 rounded-lg px-4 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[150px] text-sm"
           >
             <option value="" className="bg-slate-900">All Modules</option>
             {modules.map(m => (
@@ -215,7 +215,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
           <select 
             value={filterStatusId}
             onChange={(e) => setFilterStatusId(e.target.value)}
-            className="bg-black/30 border border-white/20 rounded-lg px-4 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[150px] text-sm"
+            className="bg-black/30 border border-slate-700 rounded-lg px-4 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[150px] text-sm"
           >
             <option value="" className="bg-slate-900">All Statuses</option>
             {statuses.map(s => (
@@ -225,10 +225,10 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-black/20 border border-white/10 rounded-2xl shadow-xl">
+      <div className="overflow-x-auto bg-slate-800 border border-slate-800 rounded-2xl shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
+            <tr className="border-b border-slate-800 bg-white/5">
               <th className="py-4 px-6 text-indigo-200 font-semibold w-32">TC ID</th>
               <th className="py-4 px-6 text-indigo-200 font-semibold">Title</th>
               <th className="py-4 px-6 text-indigo-200 font-semibold w-1/3">Expected Result</th>
@@ -237,10 +237,17 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
             </tr>
           </thead>
           <tbody>
-            {filteredTestcases.map((tc: any) => (
-              <Fragment key={tc.id}>
-                <tr 
-                  className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${expandedRowId === tc.id ? 'bg-white/5' : ''}`}
+            {filteredTestcases.map((tc: any) => {
+              const claim = tc.testcase?.module?.claimHistories?.find((c: any) => c.sessionId === sessionId);
+              const claimedByMe = claim && claim.claimedById === currentUser?.id;
+              const tooltipMsg = !claimedByMe 
+                ? (!claim ? 'Module harus di-claim sebelum testcase dapat dieksekusi.' : 'Hanya user yang melakukan claim pada module ini yang dapat mengeksekusi testcase-nya.') 
+                : '';
+
+              return (
+                <Fragment key={tc.id}>
+                  <tr 
+                  className={`border-b border-slate-800 hover:bg-white/5 transition-colors cursor-pointer ${expandedRowId === tc.id ? 'bg-white/5' : ''}`}
                   onClick={() => toggleRow(tc.id)}
                 >
                   <td className="py-4 px-6">
@@ -257,18 +264,20 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                     {tc.testcase.description && <div className="text-sm text-indigo-200/70 mt-1">{tc.testcase.description}</div>}
                   </td>
                   <td className="py-4 px-6 text-white/80 text-sm">{tc.testcase.expectedResult}</td>
-                  <td className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
+                  <td className="py-4 px-6" onClick={(e) => e.stopPropagation()} title={tooltipMsg}>
                     <select
                       value={tc.statusId}
                       onChange={(e) => handleStatusChange(tc, Number(e.target.value), tc.statusId)}
-                      disabled={isSessionLocked}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-slate-900 ${
+                      disabled={isSessionLocked || !claimedByMe}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-slate-900 ${
+                        isSessionLocked || !claimedByMe ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                      } ${
                         tc.status.name.toUpperCase() === 'PASSED' ? 'border-emerald-500/50 text-emerald-400' :
                         tc.status.name.toUpperCase() === 'FAILED' ? 'border-rose-500/50 text-rose-400' :
                         tc.status.name.toUpperCase() === 'PASSED WITH NOTES' ? 'border-amber-500/50 text-amber-400' :
                         tc.status.name.toUpperCase() === 'BLOCKED' ? 'border-slate-500/50 text-slate-400' :
                         tc.status.name.toUpperCase() === 'DROPPED' ? 'border-zinc-500/50 text-zinc-400' :
-                        'border-white/20 text-white/70'
+                        'border-slate-700 text-white/70'
                       }`}
                     >
                       {statuses.map(s => (
@@ -281,7 +290,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                   </td>
                 </tr>
                 {expandedRowId === tc.id && (
-                  <tr className="bg-black/40 border-b border-white/10">
+                  <tr className="bg-slate-800 border-b border-slate-800">
                     <td colSpan={5} className="p-0">
                       <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner ">
                         <h4 className="text-indigo-200 font-bold mb-4 flex items-center gap-2">
@@ -289,7 +298,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                           Test Steps
                         </h4>
                         {tc.testcase.steps?.length > 0 ? (
-                          <ul className="border border-indigo-500/20 rounded-lg overflow-hidden bg-black/20">
+                          <ul className="border border-indigo-500/20 rounded-lg overflow-hidden bg-slate-800">
                             <li className="grid grid-cols-12 gap-4 p-2.5 border-b border-indigo-500/20 bg-indigo-500/10 text-indigo-200 text-[11px] font-bold uppercase tracking-wider">
                               <div className="col-span-1 text-center">Step</div>
                               <div className="col-span-5">Action</div>
@@ -302,7 +311,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                               const stepStatusName = stepExec?.status?.name || 'TO DO';
 
                               return (
-                                <li key={step.id} className={`grid grid-cols-12 gap-4 p-3 items-center hover:bg-white/5 transition-colors ${index !== tc.testcase.steps.length - 1 ? 'border-b border-white/5' : ''}`}>
+                                <li key={step.id} className={`grid grid-cols-12 gap-4 p-3 items-center hover:bg-white/5 transition-colors ${index !== tc.testcase.steps.length - 1 ? 'border-b border-slate-800' : ''}`}>
                                   <div className="col-span-1 flex justify-center">
                                     <div className="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold font-mono">
                                       {step.sequence}
@@ -310,18 +319,20 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                                   </div>
                                   <div className="col-span-5 text-white/90 text-sm leading-snug">{step.action}</div>
                                   <div className="col-span-4 text-emerald-300/80 text-sm leading-snug">{step.expectedResult}</div>
-                                  <div className="col-span-2 flex justify-center">
+                                  <div className="col-span-2 flex justify-center" title={tooltipMsg}>
                                     <select
                                       value={stepStatusId}
                                       onChange={(e) => handleStepStatusChange(tc, step.id, Number(e.target.value), stepStatusId)}
-                                      disabled={isSessionLocked}
-                                      className={`px-2 py-1 rounded-md text-[10px] font-bold border cursor-pointer focus:outline-none appearance-none bg-slate-900 w-full text-center ${
+                                      disabled={isSessionLocked || !claimedByMe}
+                                      className={`px-2 py-1 rounded-md text-[10px] font-bold border focus:outline-none appearance-none bg-slate-900 w-full text-center ${
+                                        isSessionLocked || !claimedByMe ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                                      } ${
                                         stepStatusName.toUpperCase() === 'PASSED' ? 'border-emerald-500/50 text-emerald-400' :
                                         stepStatusName.toUpperCase() === 'FAILED' ? 'border-rose-500/50 text-rose-400' :
                                         stepStatusName.toUpperCase() === 'PASSED WITH NOTES' ? 'border-amber-500/50 text-amber-400' :
                                         stepStatusName.toUpperCase() === 'BLOCKED' ? 'border-slate-500/50 text-slate-400' :
                                         stepStatusName.toUpperCase() === 'DROPPED' ? 'border-zinc-500/50 text-zinc-400' :
-                                        'border-white/20 text-white/70'
+                                        'border-slate-700 text-white/70'
                                       }`}
                                     >
                                       {statuses.map(s => (
@@ -334,7 +345,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                             })}
                           </ul>
                         ) : (
-                          <div className="text-white/40 text-sm flex items-center justify-center py-6 italic bg-white/5 rounded-xl border border-white/5">
+                          <div className="text-white/40 text-sm flex items-center justify-center py-6 italic bg-white/5 rounded-xl border border-slate-800">
                             No detailed steps have been defined for this testcase.
                           </div>
                         )}
@@ -343,7 +354,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                   </tr>
                 )}
               </Fragment>
-            ))}
+            );
+          })}
             {filteredTestcases.length === 0 && (
               <tr>
                 <td colSpan={5} className="py-12 text-center text-white/50 bg-white/5">
@@ -360,8 +372,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
       {/* Notes Modal */}
       {notesModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4 animate-in fade-in duration-200">
-          <div className="bg-[#0f1117] border border-white/10 rounded-2xl p-5 w-full max-w-sm shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4   ">
+          <div className="bg-[#0f1117] border border-slate-800 rounded-2xl p-5 w-full max-w-sm shadow-sm relative overflow-hidden">
             {/* Dynamic Styling based on Status */}
             {(() => {
               const statusName = statuses.find(s => s.id === notesModal.statusId)?.name?.toUpperCase() || '';
@@ -392,20 +404,20 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                       }
                     }}
                     placeholder="Optional details (Cmd/Ctrl + Enter to save)..."
-                    className={`w-full h-24 bg-black/40 border border-white/10 rounded-xl p-3 text-white text-sm focus:outline-none focus:ring-2 resize-none transition-all ${ringClass}`}
+                    className={`w-full h-24 bg-slate-800 border border-slate-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:ring-2 resize-none  ${ringClass}`}
                     autoFocus
                   />
 
                   <div className="flex justify-end gap-2 mt-4">
                     <button 
                       onClick={() => setNotesModal({ ...notesModal, isOpen: false })}
-                      className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors text-sm font-semibold"
+                      className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-slate-900 transition-colors text-sm font-semibold"
                     >
                       Cancel
                     </button>
                     <button 
                       onClick={() => submitStatusUpdate(notesModal.type, notesModal.testcaseId, notesModal.stepId, notesModal.statusId, notesModal.notes)}
-                      className={`px-5 py-2 rounded-lg font-bold transition-all text-sm ${btnClass}`}
+                      className={`px-5 py-2 rounded-lg font-bold  text-sm ${btnClass}`}
                     >
                       Save
                     </button>
@@ -419,9 +431,9 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
       {/* Restriction Modal */}
       {restrictionModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4   ">
           <div className="bg-[#0f1117] border border-rose-500/30 rounded-2xl p-6 w-full max-w-md shadow-[0_0_50px_rgba(244,63,94,0.15)] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-400"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-indigo-600"></div>
             
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
@@ -440,7 +452,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
             <div className="flex justify-end">
               <button 
                 onClick={() => setRestrictionModal({ isOpen: false, message: '' })}
-                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all text-sm"
+                className="px-6 py-2 bg-slate-900 hover:bg-white/20 text-white rounded-xl font-bold  text-sm"
               >
                 Close
               </button>

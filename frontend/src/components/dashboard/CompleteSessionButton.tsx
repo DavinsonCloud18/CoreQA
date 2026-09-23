@@ -50,15 +50,15 @@ export function CompleteSessionButton({ sessionId, initialStatus, isReady }: { s
         <button 
           onClick={handleReopen}
           disabled={loading}
-          className="bg-slate-500/20 hover:bg-slate-500/40 text-slate-300 px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+          className="bg-slate-500/20 hover:bg-slate-500/40 text-slate-300 px-4 py-2 rounded-xl text-sm font-bold  flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
           Reopen
         </button>
 
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 ">
+            <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 w-full max-w-md shadow-sm">
               <div className="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mb-4 border border-amber-500/30">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
               </div>
@@ -129,10 +129,10 @@ export function CompleteSessionButton({ sessionId, initialStatus, isReady }: { s
     <button 
       onClick={handleComplete}
       disabled={loading || !isReady}
-      className={`px-6 py-2.5 rounded-xl font-bold transition-all text-sm flex items-center gap-2 ${
+      className={`px-6 py-2.5 rounded-xl font-bold  text-sm flex items-center gap-2 ${
         isReady 
           ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)] cursor-pointer' 
-          : 'bg-white/5 text-white/30 border border-white/10 cursor-not-allowed'
+          : 'bg-white/5 text-white/30 border border-slate-800 cursor-not-allowed'
       }`}
     >
       {loading ? (
@@ -148,8 +148,8 @@ export function CompleteSessionButton({ sessionId, initialStatus, isReady }: { s
       )}
     </button>
     {isModalOpen && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 ">
+        <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 w-full max-w-md shadow-sm">
           <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-4 border border-emerald-500/30">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
           </div>

@@ -16,9 +16,9 @@ export function ModuleProgress({ modules }: { modules: any[] }) {
               <span className="text-white/50 text-xs font-medium">{mod.failedCount} / {mod.totalTestcases} testcases</span>
             </div>
           </div>
-          <div className="w-full bg-slate-900/50 rounded-full h-4 overflow-hidden border border-white/10 shadow-inner">
+          <div className="w-full bg-slate-900/50 rounded-full h-4 overflow-hidden border border-slate-800 shadow-inner">
             <div 
-              className="bg-gradient-to-r from-rose-600 to-rose-400 h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(244,63,94,0.6)]" 
+              className="bg-indigo-600 h-full rounded-full   ease-out shadow-[0_0_15px_rgba(244,63,94,0.6)]" 
               style={{ width: `${mod.failedRate}%` }}
             ></div>
           </div>

@@ -16,6 +16,7 @@ export class MasterService {
 
   async getModules() {
     const modules = await this.prisma.module.findMany({
+      where: { isDeleted: false },
       include: {
         _count: {
           select: { testcases: true }
@@ -35,6 +36,7 @@ export class MasterService {
 
   async getUsers() {
     return this.prisma.user.findMany({
+      where: { isDeleted: false },
       select: {
         id: true,
         email: true,
@@ -91,7 +93,7 @@ export class MasterService {
   }
 
   async deleteUser(id: string) {
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.user.update({ where: { id }, data: { isDeleted: true, deletedAt: new Date() } });
   }
 
   async getRoles() {

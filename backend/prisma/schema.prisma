@@ -34,6 +34,8 @@ model User {
   notifications    TestcaseNotification[]
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
+  isDeleted        Boolean                @default(false)
+  deletedAt        DateTime?
 
   @@index([roleId])
   @@map("users")
@@ -72,6 +74,8 @@ model Module {
   claimHistories ClaimHistory[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  isDeleted      Boolean          @default(false)
+  deletedAt      DateTime?
 
   @@map("modules")
 }
@@ -86,7 +90,8 @@ model MasterTestcase {
   precondition   String?
   expectedResult String?
   sequence       Int                    @default(0)
-  priority       String                 @default("Medium")
+  priority       String                 @default("sedang")
+  severity       String                 @default("minor")
   
   createdById    String?
   createdBy      User?                  @relation("TestcaseCreator", fields: [createdById], references: [id])
@@ -139,6 +144,8 @@ model Session {
   claimHistories ClaimHistory[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+  isDeleted      Boolean            @default(false)
+  deletedAt      DateTime?
 
   @@index([environmentId])
   @@index([isOpen])

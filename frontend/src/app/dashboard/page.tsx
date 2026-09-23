@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/dashboard/Sidebar';
 import { UserAssignments } from '@/components/dashboard/UserAssignments';
 import { SessionSelector } from '@/components/dashboard/SessionSelector';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
+import { HeaderProfile } from '@/components/dashboard/HeaderProfile';
 import { ExecutionChart } from '@/components/dashboard/ExecutionChart';
 import { ModuleList } from '@/components/dashboard/ModuleList';
 
@@ -84,17 +85,17 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
   }
   
   return (
-    <div className="min-h-screen relative flex bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className="min-h-screen relative flex bg-slate-950">
       
 
       <Sidebar />
 
       <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10  border border-white/20 p-6 rounded-[2rem] shadow-2xl">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
             <div className="flex-1">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-sm ">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
                 <div>
@@ -105,19 +106,25 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
             </div>
             
             <div className="flex items-center gap-4">
+               <HeaderProfile />
                <NotificationBell />
-               <SessionSelector currentSession={resolvedParams.session} />
                <LogoutButton />
             </div>
           </header>
+
+          
+          <div className="flex justify-between items-center mb-1 pr-2 mt-4">
+            <h2 className="text-xl font-bold text-white tracking-tight">Overview</h2>
+            <SessionSelector currentSession={resolvedParams.session} />
+          </div>
 
           <SummaryCards summary={data.summary} />
           
           {!isSingleSessionMode ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {activeSessionsWithAnalytics.map(session => (
-                <section key={session.id} className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center">
-                  <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+                <section key={session.id} className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center">
+                  
                   
                   <div className="w-full flex justify-between items-start mb-6 relative z-10">
                     <div>
@@ -126,7 +133,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                         <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                           {session.status}
                         </span>
-                        <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-white/10 text-white/70 border border-white/5">
+                        <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-slate-900 text-white/70 border border-slate-800">
                           {new Date(session.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {session.endDate ? new Date(session.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Ongoing'}
                         </span>
                         {session.status !== 'Finished' && session.status !== 'Done' && session.endDate && (
@@ -148,7 +155,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
 
                   <a 
                     href={`/dashboard/execution?session=${session.id}`}
-                    className="relative z-10 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-center shadow-lg hover:shadow-indigo-500/50 transition-all flex justify-center items-center gap-2"
+                    className="relative z-10 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-center shadow-sm hover:  flex justify-center items-center gap-2"
                   >
                     Execute Session
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -156,7 +163,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                 </section>
               ))}
               {activeSessionsWithAnalytics.length === 0 && (
-                <div className="col-span-full text-white/50 py-8 text-center bg-black/20 rounded-xl border border-white/5">
+                <div className="col-span-full text-white/50 py-8 text-center bg-slate-800 rounded-xl border border-slate-800">
                   No active sessions found.
                 </div>
               )}
@@ -164,14 +171,14 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Chart on the left */}
-              <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
+              <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-center">
                 <div className="w-full flex flex-col items-start mb-8 relative z-10">
                   <h2 className="text-xl font-bold text-white mb-2">
                     Execution Status Distribution
                   </h2>
                   {targetSessionId && data && (
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-white/10 text-white/70 border border-white/5">
+                      <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-slate-900 text-white/70 border border-slate-800">
                         {(() => {
                           const s = allSessions.find((s: any) => s.id === targetSessionId);
                           if (!s) return 'Timeline Unknown';
@@ -194,8 +201,8 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
               </section>
 
               {/* User assignments on the right */}
-              <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
-                <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+              <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+                
                 <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
                   <span className="w-2 h-6 bg-indigo-500 rounded-full inline-block shadow-[0_0_10px_rgba(99,102,241,0.6)]"></span>
                   Team Assignments

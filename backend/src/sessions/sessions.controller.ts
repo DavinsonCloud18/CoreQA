@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { SessionsService } from './sessions.service.js';
 import { CreateSessionDto } from './sessions.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -16,6 +16,13 @@ export class SessionsController {
   @Get()
   async getSessions() {
     const data = await this.sessionsService.getSessions();
+    return { data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('my-tasks')
+  async getMyTasks(@Request() req: any) {
+    const data = await this.sessionsService.getMyTasks(req.user.id);
     return { data };
   }
 

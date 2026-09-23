@@ -20,8 +20,8 @@ export function SummaryCards({ summary }: { summary: any }) {
   const passRate = effectiveTotal > 0 ? Math.round(((passed + passedNotes) / effectiveTotal) * 100) : 0;
 
   return (
-    <div className="p-6 rounded-[2rem] bg-indigo-950/20  border border-indigo-500/20 shadow-2xl relative overflow-hidden group">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full group-hover:bg-indigo-400/20 transition-all duration-700"></div>
+    <div className="p-6 rounded-[2rem] bg-indigo-950/20  border border-indigo-500/20 shadow-sm relative overflow-hidden group">
+      
       
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
         
@@ -45,32 +45,32 @@ export function SummaryCards({ summary }: { summary: any }) {
 
         {/* Detailed Breakdown Badges */}
         <div className="flex flex-wrap gap-3 lg:justify-end">
-          <div className="flex flex-col items-center bg-emerald-500/10 border border-emerald-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+          <div className="flex flex-col items-center bg-emerald-500/10 border border-emerald-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-sm">
             <span className="text-emerald-400 text-2xl font-bold">{passed}</span>
             <span className="text-emerald-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Passed</span>
           </div>
           
-          <div className="flex flex-col items-center bg-amber-500/10 border border-amber-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+          <div className="flex flex-col items-center bg-amber-500/10 border border-amber-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-sm">
             <span className="text-amber-400 text-2xl font-bold">{passedNotes}</span>
             <span className="text-amber-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Notes</span>
           </div>
           
-          <div className="flex flex-col items-center bg-rose-500/10 border border-rose-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+          <div className="flex flex-col items-center bg-rose-500/10 border border-rose-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-sm">
             <span className="text-rose-400 text-2xl font-bold">{failed}</span>
             <span className="text-rose-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Failed</span>
           </div>
           
-          <div className="flex flex-col items-center bg-slate-500/10 border border-slate-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+          <div className="flex flex-col items-center bg-slate-500/10 border border-slate-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-sm">
             <span className="text-slate-400 text-2xl font-bold">{blocked}</span>
             <span className="text-slate-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Blocked</span>
           </div>
 
-          <div className="flex flex-col items-center bg-zinc-500/10 border border-zinc-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+          <div className="flex flex-col items-center bg-zinc-500/10 border border-zinc-500/20 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-sm">
             <span className="text-zinc-400 text-2xl font-bold">{dropped}</span>
             <span className="text-zinc-500/70 text-[10px] uppercase font-black tracking-wider mt-1">Dropped</span>
           </div>
           
-          <div className="flex flex-col items-center bg-white/5 border border-white/10 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-lg">
+          <div className="flex flex-col items-center bg-white/5 border border-slate-800 px-5 py-2.5 rounded-2xl min-w-[90px] shadow-sm">
             <span className="text-white/60 text-2xl font-bold">{todo}</span>
             <span className="text-white/40 text-[10px] uppercase font-black tracking-wider mt-1">To Do</span>
           </div>
@@ -78,12 +78,12 @@ export function SummaryCards({ summary }: { summary: any }) {
       </div>
       
       {/* Visual Progress Bar (Multi-Segment) */}
-      <div className="w-full h-3 bg-black/40 rounded-full mt-8 overflow-hidden flex relative z-10 border border-white/5 shadow-inner">
-        <div style={{ width: `${getPercentage(passed)}%` }} className="h-full bg-emerald-400 hover:bg-emerald-300 transition-all duration-1000 shadow-[0_0_10px_rgba(52,211,153,0.5)]" title="Passed"></div>
-        <div style={{ width: `${getPercentage(passedNotes)}%` }} className="h-full bg-amber-400 hover:bg-amber-300 transition-all duration-1000 shadow-[0_0_10px_rgba(251,191,36,0.5)]" title="Passed with Notes"></div>
-        <div style={{ width: `${getPercentage(failed)}%` }} className="h-full bg-rose-400 hover:bg-rose-300 transition-all duration-1000 shadow-[0_0_10px_rgba(244,63,94,0.5)]" title="Failed"></div>
-        <div style={{ width: `${getPercentage(blocked)}%` }} className="h-full bg-slate-400 hover:bg-slate-300 transition-all duration-1000 shadow-[0_0_10px_rgba(148,163,184,0.5)]" title="Blocked"></div>
-        <div style={{ width: `${getPercentage(dropped)}%` }} className="h-full bg-zinc-400 hover:bg-zinc-300 transition-all duration-1000 shadow-[0_0_10px_rgba(113,113,122,0.5)]" title="Dropped"></div>
+      <div className="w-full h-3 bg-slate-800 rounded-full mt-8 overflow-hidden flex relative z-10 border border-slate-800 shadow-inner">
+        <div style={{ width: `${getPercentage(passed)}%` }} className="h-full bg-emerald-400 hover:bg-emerald-300   shadow-[0_0_10px_rgba(52,211,153,0.5)]" title="Passed"></div>
+        <div style={{ width: `${getPercentage(passedNotes)}%` }} className="h-full bg-amber-400 hover:bg-amber-300   shadow-[0_0_10px_rgba(251,191,36,0.5)]" title="Passed with Notes"></div>
+        <div style={{ width: `${getPercentage(failed)}%` }} className="h-full bg-rose-400 hover:bg-rose-300   shadow-[0_0_10px_rgba(244,63,94,0.5)]" title="Failed"></div>
+        <div style={{ width: `${getPercentage(blocked)}%` }} className="h-full bg-slate-400 hover:bg-slate-300   shadow-[0_0_10px_rgba(148,163,184,0.5)]" title="Blocked"></div>
+        <div style={{ width: `${getPercentage(dropped)}%` }} className="h-full bg-zinc-400 hover:bg-zinc-300   shadow-[0_0_10px_rgba(113,113,122,0.5)]" title="Dropped"></div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { LogoutButton } from '@/components/dashboard/LogoutButton';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
+import { HeaderProfile } from '@/components/dashboard/HeaderProfile';
 import { ExecutionTable } from '@/components/dashboard/ExecutionTable';
 import { SessionSelector } from '@/components/dashboard/SessionSelector';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
@@ -47,20 +48,20 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
   const isReady = (total - droppedCount) > 0 && passedCount === (total - droppedCount);
   
   return (
-    <div className="min-h-screen relative flex bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className="min-h-screen relative flex bg-slate-950">
       
 
       <Sidebar />
 
       <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/10  border border-white/20 p-6 rounded-[2rem] shadow-2xl">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
             <div className="flex-1">
               <div className="flex items-center gap-4">
-                <Link href="/dashboard/sessions" className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center transition-colors">
+                <Link href="/dashboard/sessions" className="w-12 h-12 bg-white/5 hover:bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center transition-colors">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </Link>
-                <div className="w-12 h-12 bg-gradient-to-tr from-amber-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/30">
+                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-sm ">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
                 <div>
@@ -70,14 +71,15 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
               </div>
             </div>
             <div className="flex items-center gap-4">
+               <HeaderProfile />
                <NotificationBell />
                <SessionSelector currentSession={resolvedParams.session} />
                <LogoutButton />
             </div>
           </header>
 
-          <section className="bg-white/10  border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden min-h-[400px]">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden min-h-[400px]">
+             
              
              <div className="relative z-10">
                {resolvedParams.session ? (
@@ -102,7 +104,7 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
                    <ModuleList modules={sessionModules} sessionId={resolvedParams.session} />
                  </div>
                ) : (
-                 <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-white/20 rounded-2xl">
+                 <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-700 rounded-2xl">
                     <svg className="w-12 h-12 text-white/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <p className="text-white/50 text-lg font-medium text-center">Please select a Session from the top right<br/>to start executing testcases.</p>
                  </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TestcaseForm } from './TestcaseForm';
 import { useSearchParams } from 'next/navigation';
 
@@ -12,12 +12,11 @@ export function TestcaseManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterModule, setFilterModule] = useState('');
   const [filterUser, setFilterUser] = useState('');
-  const [showDeleted, setShowDeleted] = useState(false);
   
   const [currentUser, setCurrentUser] = useState<any>(null);
-  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [expandedTc, setExpandedTc] = useState<string | null>(null);
   
   const searchParams = useSearchParams();
   const highlightId = searchParams.get('highlight');
@@ -36,7 +35,7 @@ export function TestcaseManagement() {
       fetchData();
       fetchModulesAndUsers();
     }
-  }, [currentUser, filterModule, filterUser, showDeleted]);
+  }, [currentUser, filterModule, filterUser]);
 
   const fetchData = async () => {
     try {
@@ -45,7 +44,7 @@ export function TestcaseManagement() {
       const params = new URLSearchParams();
       if (filterModule) params.append('moduleId', filterModule);
       if (filterUser) params.append('createdById', filterUser);
-      params.append('isDeleted', showDeleted ? 'true' : 'false');
+      params.append('isDeleted', 'false');
       
       const res = await fetch(`${baseUrl}/testcases?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${authData.access_token}` }
@@ -95,6 +94,7 @@ export function TestcaseManagement() {
     } catch(err) {}
   };
 
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this testcase?')) return;
     try {
@@ -126,10 +126,10 @@ export function TestcaseManagement() {
   );
 
   return (
-    <div className="bg-white/10 border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
       
-      <div className="relative z-10 flex flex-col xl:flex-row gap-6 mb-8 items-start xl:items-center justify-between border-b border-white/10 pb-6">
+      
+      <div className="relative z-10 flex flex-col xl:flex-row gap-6 mb-8 items-start xl:items-center justify-between border-b border-slate-800 pb-6">
         <div className="flex gap-4 w-full xl:w-auto">
           <div className="flex-1 sm:w-64">
             <label className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Search</label>
@@ -140,60 +140,58 @@ export function TestcaseManagement() {
                 placeholder="ID or Title..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
           </div>
           <div className="flex-1 sm:w-48">
             <label className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Module</label>
-            <select 
-              value={filterModule}
-              onChange={e => setFilterModule(e.target.value)}
-              className="w-full bg-black/20 border border-white/10 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="">All Modules</option>
-              {modules.map(m => <option key={m.id} value={m.id}>{m.code} - {m.name}</option>)}
-            </select>
+            <div className="relative">
+              <select 
+                value={filterModule}
+                onChange={e => setFilterModule(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-3 pr-10 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
+              >
+                <option value="">All Modules</option>
+                {modules.map(m => <option key={m.id} value={m.id}>{m.code} - {m.name}</option>)}
+              </select>
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
           </div>
           <div className="flex-1 sm:w-48">
             <label className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Creator</label>
-            <select 
-              value={filterUser}
-              onChange={e => setFilterUser(e.target.value)}
-              className="w-full bg-black/20 border border-white/10 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="">All Users</option>
-              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
+            <div className="relative">
+              <select 
+                value={filterUser}
+                onChange={e => setFilterUser(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-3 pr-10 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
+              >
+                <option value="">All Users</option>
+                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-4 w-full xl:w-auto">
-          <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer hover:text-white transition-colors">
-            <input 
-              type="checkbox" 
-              checked={showDeleted}
-              onChange={e => setShowDeleted(e.target.checked)}
-              className="w-4 h-4 rounded bg-black/20 border-white/20 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
-            />
-            Show Deleted
-          </label>
           <button 
             onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
-            className="flex-1 xl:flex-none px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl font-bold text-white shadow-lg hover:shadow-indigo-500/50 transition-shadow whitespace-nowrap text-sm"
+            className="flex-1 xl:flex-none px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:  whitespace-nowrap text-sm"
           >
             + Add Testcase
           </button>
         </div>
       </div>
 
-      <div className="relative z-10 overflow-x-auto bg-black/20 rounded-2xl border border-white/10">
+      <div className="relative z-10 overflow-x-auto bg-slate-800 rounded-2xl border border-slate-800">
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
+            <tr className="border-b border-slate-800 bg-white/5">
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">ID</th>
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">Title</th>
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">Module</th>
+              <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">Expected Result</th>
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">Priority</th>
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">Creator</th>
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs text-right">Actions</th>
@@ -203,50 +201,112 @@ export function TestcaseManagement() {
             {filteredTestcases.map(tc => {
               const isHighlighted = tc.id === highlightId;
               return (
-                <tr key={tc.id} className={`hover:bg-white/5 transition-colors group ${isHighlighted ? 'bg-indigo-500/10' : ''}`}>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <span className="text-xs font-bold px-2 py-1 bg-white/10 rounded-md text-white/70 border border-white/5">{tc.testcaseId}</span>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white leading-tight">{tc.title}</span>
-                      {tc.isDeleted && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded uppercase tracking-wider">Deleted</span>}
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <span className="text-indigo-300 text-xs font-semibold">{tc.module.name}</span>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border ${tc.priority === 'High' || tc.priority === 'Critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : tc.priority === 'Medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'}`}>
-                      {tc.priority}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <span className="text-xs font-semibold text-white/70">{tc.createdBy?.name}</span>
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-right">
-                    <div className="flex justify-end gap-2">
-                      {!tc.isDeleted && (
-                        <>
-                          <button onClick={async () => {
-                             const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-                             const authData = JSON.parse(localStorage.getItem('auth') || '{}');
-                             const res = await fetch(`${baseUrl}/testcases/${tc.id}`, { headers: { 'Authorization': `Bearer ${authData.access_token}` } });
-                             if (res.ok) {
-                               setEditingItem((await res.json()).data);
-                               setIsFormOpen(true);
-                             }
-                          }} className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-xs transition-colors">Edit</button>
-                          
-                          <button onClick={() => handleDelete(tc.id)} className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-medium text-xs transition-colors border border-rose-500/20">Delete</button>
-                        </>
-                      )}
-                      {tc.isDeleted && (
-                        <button onClick={() => handleRevive(tc.id)} className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-medium text-xs transition-colors border border-emerald-500/20">Revive</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+                <React.Fragment key={tc.id}>
+                  <tr 
+                    className={`hover:bg-white/5 transition-colors group cursor-pointer ${isHighlighted || expandedTc === tc.id ? 'bg-indigo-500/10' : ''}`}
+                    onClick={() => setExpandedTc(expandedTc === tc.id ? null : tc.id)}
+                  >
+                    <td className="py-4 px-6 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <svg className={`w-4 h-4 text-indigo-400 transition-transform ${expandedTc === tc.id ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                        <span className="text-xs font-bold px-2 py-1 bg-slate-900 rounded-md text-white/70 border border-slate-800">{tc.testcaseId}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white leading-tight">{tc.title}</span>
+                        {tc.isDeleted && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded uppercase tracking-wider">Deleted</span>}
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 whitespace-nowrap">
+                      <span className="text-indigo-300 text-xs font-semibold">{tc.module.name}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <p className="text-white/70 text-xs line-clamp-2 w-48" title={tc.expectedResult}>{tc.expectedResult || '-'}</p>
+                    </td>
+                    <td className="py-4 px-6 whitespace-nowrap">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border ${tc.priority === 'High' || tc.priority === 'Critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : tc.priority === 'Medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'}`}>
+                        {tc.priority}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 whitespace-nowrap">
+                      <span className="text-xs font-semibold text-white/70">{tc.createdBy?.name || '-'}</span>
+                    </td>
+                    <td className="py-4 px-6 whitespace-nowrap text-right">
+                      <div className="flex justify-end gap-2">
+                        {!tc.isDeleted && (
+                          <>
+                            <button onClick={async (e) => {
+                               e.stopPropagation();
+                               const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+                               const authData = JSON.parse(localStorage.getItem('auth') || '{}');
+                               const res = await fetch(`${baseUrl}/testcases/${tc.id}`, { headers: { 'Authorization': `Bearer ${authData.access_token}` } });
+                               if (res.ok) {
+                                 setEditingItem((await res.json()).data);
+                                 setIsFormOpen(true);
+                               }
+                            }} className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-slate-900 text-white font-medium text-xs transition-colors">Edit</button>
+                            
+                            <button onClick={(e) => { e.stopPropagation(); handleDelete(tc.id); }} className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-medium text-xs transition-colors border border-rose-500/20">Delete</button>
+                          </>
+                        )}
+                        {tc.isDeleted && (
+                          <button onClick={(e) => { e.stopPropagation(); handleRevive(tc.id); }} className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-medium text-xs transition-colors border border-emerald-500/20">Revive</button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  {expandedTc === tc.id && (
+                    <tr className="bg-slate-800 border-b border-slate-800">
+                      <td colSpan={7} className="p-0">
+                        <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner">
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <h4 className="text-xs font-bold text-indigo-200/50 uppercase tracking-wider mb-1">Description</h4>
+                                <p className="text-white/80 text-sm whitespace-pre-line">{tc.description || '-'}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-bold text-indigo-200/50 uppercase tracking-wider mb-1">Precondition</h4>
+                                <p className="text-white/80 text-sm whitespace-pre-line">{tc.precondition || '-'}</p>
+                              </div>
+                            </div>
+                            
+                            {tc.steps && tc.steps.length > 0 && (
+                              <div>
+                                <h4 className="text-indigo-200 font-bold mb-4 flex items-center gap-2">
+                                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                  Test Steps
+                                </h4>
+                                <ul className="border border-indigo-500/20 rounded-lg overflow-hidden bg-slate-800">
+                                  <li className="grid grid-cols-12 gap-4 p-2.5 border-b border-indigo-500/20 bg-indigo-500/10 text-indigo-200 text-[11px] font-bold uppercase tracking-wider">
+                                    <div className="col-span-1 text-center">Step</div>
+                                    <div className="col-span-5">Action</div>
+                                    <div className="col-span-6">Expected Result</div>
+                                  </li>
+                                  {tc.steps.map((step: any) => (
+                                    <li key={step.id} className="grid grid-cols-12 gap-4 p-3 border-b border-slate-800 last:border-b-0 hover:bg-white/5 transition-colors">
+                                      <div className="col-span-1 text-center text-indigo-200/50 font-mono text-sm">{step.sequence}</div>
+                                      <div className="col-span-5 text-white/80 text-sm whitespace-pre-line">{step.action}</div>
+                                      <div className="col-span-6 text-white/80 text-sm whitespace-pre-line">{step.expectedResult}</div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            <div className="pt-2 flex justify-end">
+                              <span className="text-xs text-indigo-200/40 italic">
+                                Terakhir diupdate oleh: <span className="font-semibold text-indigo-200/60">{tc.updatedBy?.name || tc.createdBy?.name || '-'}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })}
             {filteredTestcases.length === 0 && (

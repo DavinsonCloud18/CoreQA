@@ -14,9 +14,10 @@ export function ModuleManagement() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({ name: '', code: '', description: '' });
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [page, setPage] = useState(1);
   const [metadata, setMetadata] = useState<any>({ totalPages: 1 });
+  const [moduleToDelete, setModuleToDelete] = useState<any>(null);
 
   useEffect(() => {
     const authData = localStorage.getItem('auth');
@@ -70,16 +71,21 @@ export function ModuleManagement() {
     } catch(err) {}
   };
 
-  const handleDelete = async (id: string, e: any) => {
+  const handleDeleteClick = (mod: any, e: any) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this module? This action cannot be undone.')) return;
+    setModuleToDelete(mod);
+  };
+
+  const confirmDelete = async () => {
+    if (!moduleToDelete) return;
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const authData = JSON.parse(localStorage.getItem('auth') || '{}');
-      await fetch(`${baseUrl}/modules/${id}`, {
+      await fetch(`${baseUrl}/modules/${moduleToDelete.id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${authData.access_token}` }
       });
+      setModuleToDelete(null);
       fetchData();
     } catch(err) {}
   };
@@ -103,10 +109,10 @@ export function ModuleManagement() {
   }
 
   return (
-    <div className="bg-white/10 border border-white/20 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
       
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-white/10 pb-6 gap-4">
+      
+      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-slate-800 pb-6 gap-4">
         <h2 className="text-xl font-bold text-white shrink-0">System Modules</h2>
         <div className="flex w-full md:w-auto items-center gap-4">
           <div className="relative flex-1 md:w-64">
@@ -119,10 +125,10 @@ export function ModuleManagement() {
                 setSearchQuery(e.target.value);
                 setPage(1);
               }}
-              className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
-          <div className="flex bg-black/20 rounded-xl p-1 border border-white/10">
+          <div className="flex bg-slate-800 rounded-xl p-1 border border-slate-800">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-indigo-500 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
@@ -141,7 +147,7 @@ export function ModuleManagement() {
           {canEdit && (
             <button 
               onClick={() => openForm()}
-              className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-xl font-bold text-white shadow-lg hover:shadow-indigo-500/50 transition-shadow text-sm whitespace-nowrap"
+              className="px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:  text-sm whitespace-nowrap"
             >
               + Add Module
             </button>
@@ -155,7 +161,7 @@ export function ModuleManagement() {
             <div 
               key={mod.id} 
               onClick={() => setSelectedModuleId(mod.id)}
-              className="bg-black/20 border border-white/10 p-6 rounded-[1.5rem] hover:bg-white/10 cursor-pointer transition-colors flex flex-col relative"
+              className="bg-slate-800 border border-slate-800 p-6 rounded-[1.5rem] hover:bg-slate-900 cursor-pointer transition-colors flex flex-col relative"
             >
               <div className="absolute top-4 right-4 text-white/20">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
@@ -172,7 +178,7 @@ export function ModuleManagement() {
                 {mod.description || 'No description provided.'}
               </p>
               
-              <div className="flex justify-between items-end border-t border-white/10 pt-4 mt-auto">
+              <div className="flex justify-between items-end border-t border-slate-800 pt-4 mt-auto">
                 <div className="flex gap-2">
                 </div>
                 {canEdit && (
@@ -180,7 +186,7 @@ export function ModuleManagement() {
                     <button onClick={(e) => openForm(mod, e)} className="p-2 rounded-lg bg-white/5 hover:bg-white/20 text-white transition-colors">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </button>
-                    <button onClick={(e) => handleDelete(mod.id, e)} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors">
+                    <button onClick={(e) => handleDeleteClick(mod, e)} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                   </div>
@@ -189,16 +195,16 @@ export function ModuleManagement() {
             </div>
           ))}
           {modules.length === 0 && (
-            <div className="col-span-full py-12 text-center text-white/50 bg-black/20 rounded-2xl border border-white/5">
+            <div className="col-span-full py-12 text-center text-white/50 bg-slate-800 rounded-2xl border border-slate-800">
               No modules found.
             </div>
           )}
         </div>
       ) : (
-        <div className="relative z-10 bg-black/20 border border-white/10 rounded-2xl overflow-hidden mb-8">
+        <div className="relative z-10 bg-slate-800 border border-slate-800 rounded-2xl overflow-hidden mb-8">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10 bg-white/5">
+              <tr className="border-b border-slate-800 bg-white/5">
                 <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold">Code</th>
                 <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold">Name</th>
                 <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold">Description</th>
@@ -210,7 +216,7 @@ export function ModuleManagement() {
                 <tr 
                   key={mod.id} 
                   onClick={() => setSelectedModuleId(mod.id)}
-                  className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
+                  className="border-b border-slate-800 hover:bg-white/5 cursor-pointer transition-colors"
                 >
                   <td className="py-4 px-6">
                     <span className="font-bold text-indigo-300 bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 text-xs tracking-wider">
@@ -225,7 +231,7 @@ export function ModuleManagement() {
                         <button onClick={(e) => openForm(mod, e)} className="p-2 rounded-lg bg-white/5 hover:bg-white/20 text-white transition-colors">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </button>
-                        <button onClick={(e) => handleDelete(mod.id, e)} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors">
+                        <button onClick={(e) => handleDeleteClick(mod, e)} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                       </div>
@@ -251,7 +257,7 @@ export function ModuleManagement() {
           <button 
             disabled={page === 1}
             onClick={() => setPage(p => Math.max(1, p - 1))}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 rounded-xl bg-white/5 hover:bg-slate-900 text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
           </button>
@@ -261,7 +267,7 @@ export function ModuleManagement() {
           <button 
             disabled={page >= metadata.totalPages}
             onClick={() => setPage(p => Math.min(metadata.totalPages, p + 1))}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 rounded-xl bg-white/5 hover:bg-slate-900 text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
           </button>
@@ -270,8 +276,8 @@ export function ModuleManagement() {
 
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-slate-800/50">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-sm overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
               <h2 className="text-xl font-bold text-white">{editingItem ? 'Edit Module' : 'Add Module'}</h2>
               <button onClick={() => setIsFormOpen(false)} className="text-white/50 hover:text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -281,21 +287,43 @@ export function ModuleManagement() {
               <form id="modForm" onSubmit={handleSave} className="space-y-4">
                 <div>
                   <label className="block text-sm font-bold text-white/70 mb-2">Module Name *</label>
-                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-white/70 mb-2">Module Code (Prefix) *</label>
-                  <input type="text" required value={formData.code} onChange={e => setFormData({...formData, code: e.target.value.toUpperCase()})} placeholder="e.g. AUTH" className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="text" required value={formData.code} onChange={e => setFormData({...formData, code: e.target.value.toUpperCase()})} placeholder="e.g. AUTH" className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-white/70 mb-2">Description</label>
-                  <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
               </form>
             </div>
-            <div className="p-6 border-t border-white/10 bg-slate-800/50 flex justify-end gap-3">
-              <button onClick={() => setIsFormOpen(false)} className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition-colors">Cancel</button>
-              <button type="submit" form="modForm" className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-colors shadow-lg hover:shadow-indigo-500/50">Save</button>
+            <div className="p-6 border-t border-slate-800 bg-slate-800/50 flex justify-end gap-3">
+              <button onClick={() => setIsFormOpen(false)} className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-white/20 text-white font-medium transition-colors">Cancel</button>
+              <button type="submit" form="modForm" className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-colors shadow-sm hover:">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {moduleToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-slate-900 border border-rose-500/20 rounded-2xl w-full max-w-sm shadow-sm overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-rose-500/10">
+              <div className="flex items-center gap-3 text-rose-400">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <h2 className="text-xl font-bold">Delete Module</h2>
+              </div>
+            </div>
+            <div className="p-6">
+              <p className="text-white/80 text-sm mb-2">Are you sure you want to delete module <strong>{moduleToDelete.name}</strong>?</p>
+              <p className="text-rose-400/80 text-xs italic">This action cannot be undone. All test cases inside this module might be affected.</p>
+            </div>
+            <div className="p-6 border-t border-slate-800 bg-slate-800/50 flex justify-end gap-3">
+              <button onClick={() => setModuleToDelete(null)} className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-white/20 text-white font-medium transition-colors">Cancel</button>
+              <button onClick={confirmDelete} className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold transition-colors shadow-sm hover:">Delete</button>
             </div>
           </div>
         </div>

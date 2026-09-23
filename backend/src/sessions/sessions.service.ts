@@ -40,7 +40,10 @@ export class SessionsService {
         await tx.sessionModule.createMany({ data: sessionModules });
 
         const testcases = await tx.masterTestcase.findMany({
-          where: { moduleId: { in: dto.moduleIds } }
+          where: { 
+            moduleId: { in: dto.moduleIds },
+            isDeleted: false
+          }
         });
 
         if (testcases.length > 0) {
@@ -69,6 +72,7 @@ export class SessionsService {
 
   async getSessions() {
     return this.prisma.session.findMany({
+      where: { isDeleted: false },
       include: {
         environment: true,
         _count: {
@@ -83,13 +87,7 @@ export class SessionsService {
     const sessionModules = await this.prisma.sessionModule.findMany({
       where: { sessionId },
       include: {
-        module: {
-          include: {
-            _count: {
-              select: { testcases: true }
-            }
-          }
-        }
+        module: true
       }
     });
 
@@ -118,7 +116,7 @@ export class SessionsService {
         id: module.id,
         name: module.name,
         description: module.description,
-        testcaseCount: module._count.testcases,
+        testcaseCount: moduleExecutions.length,
         claimedBy: claim ? claim.claimedBy.name : null,
         claimedById: claim ? claim.claimedById : null,
         isClaimed: !!claim,
@@ -169,5 +167,96 @@ export class SessionsService {
       where: { id: sessionId },
       data: { status }
     });
+  }
+
+  async getMyTasks(userId: string) {
+    const claims = await this.prisma.claimHistory.findMany({
+      where: { 
+        claimedById: userId, 
+        isActive: true,
+        session: {
+          isOpen: true,
+          status: {
+            notIn: ['COMPLETED', 'Finished']
+          }
+        }
+      },
+      include: {
+        session: {
+          select: { id: true, name: true, status: true, environment: true }
+        },
+        module: {
+          select: { id: true, code: true, name: true, description: true }
+        }
+      }
+    });
+
+    const sessionIds = [...new Set(claims.map(c => c.sessionId))];
+    const executions = await this.prisma.sessionExecution.findMany({
+      where: { 
+        sessionId: { in: sessionIds } 
+      },
+      include: {
+        status: true,
+        testcase: { select: { moduleId: true } }
+      }
+    });
+
+    const tasks = claims.map(claim => {
+      const moduleExecs = executions.filter(e => 
+        e.sessionId === claim.sessionId && 
+        e.testcase.moduleId === claim.moduleId
+      );
+
+      const totalTestcases = moduleExecs.length;
+      const executedTestcases = moduleExecs.filter(e => {
+        const sName = e.status.name.toUpperCase();
+        return sName !== 'TO DO' && sName !== 'UNTESTED';
+      }).length;
+
+      const statusBreakdown: Record<string, number> = {};
+      moduleExecs.forEach(e => {
+        const sName = e.status.name;
+        statusBreakdown[sName] = (statusBreakdown[sName] || 0) + 1;
+      });
+
+      return {
+        sessionId: claim.sessionId,
+        sessionName: claim.session.name,
+        sessionStatus: claim.session.status,
+        environmentName: (claim.session as any).environment?.name || '',
+        moduleId: claim.moduleId,
+        moduleCode: claim.module.code,
+        moduleName: claim.module.name,
+        moduleDescription: claim.module.description,
+        totalTestcases,
+        executedTestcases,
+        progress: totalTestcases > 0 ? Math.round((executedTestcases / totalTestcases) * 100) : 0,
+        statusBreakdown
+      };
+    });
+
+    const totalStatusBreakdown: Record<string, number> = {};
+    tasks.forEach(t => {
+      Object.keys(t.statusBreakdown).forEach(status => {
+        totalStatusBreakdown[status] = (totalStatusBreakdown[status] || 0) + t.statusBreakdown[status];
+      });
+    });
+
+    const totalModules = tasks.length;
+    const totalAssignedTestcases = tasks.reduce((sum, t) => sum + t.totalTestcases, 0);
+    const totalExecutedTestcases = tasks.reduce((sum, t) => sum + t.executedTestcases, 0);
+    const totalRemainingTestcases = totalAssignedTestcases - totalExecutedTestcases;
+
+    return {
+      summary: {
+        totalModules,
+        totalAssignedTestcases,
+        totalExecutedTestcases,
+        totalRemainingTestcases,
+        statusBreakdown: totalStatusBreakdown
+      },
+      tasks
+    };
   }
 }

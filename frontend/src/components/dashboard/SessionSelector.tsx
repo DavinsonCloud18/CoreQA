@@ -47,7 +47,7 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
     <div className="relative group inline-block z-50" ref={dropdownRef}>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex items-center bg-[#0f1117] border border-indigo-500/30 hover:border-indigo-400/80 rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-[300px]"
+        className="relative flex items-center bg-[#0f1117] border border-indigo-500/30 hover:border-indigo-400/80 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-[300px]"
       >
         {/* Context Icon */}
         <div className="pl-4 pr-3 py-3 flex items-center justify-center text-indigo-400 bg-indigo-500/10 border-r border-indigo-500/20">
@@ -67,8 +67,8 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full mt-2 w-full bg-slate-900 border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-2 border-b border-white/10 bg-black/20">
+        <div className="absolute top-full mt-2 w-full bg-slate-900 border border-indigo-500/30 rounded-xl shadow-sm overflow-hidden    ">
+          <div className="p-2 border-b border-slate-800 bg-slate-800">
             <div className="relative">
               <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               <input 
@@ -77,7 +77,7 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search sessions..."
-                className="w-full bg-black/30 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full bg-black/30 border border-slate-800 rounded-lg py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -85,7 +85,7 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
           <div className="max-h-60 overflow-y-auto custom-scrollbar">
             <div 
               onClick={() => handleSelect('')}
-              className={`px-4 py-3 text-sm cursor-pointer transition-colors ${!currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-normal'}`}
+              className={`px-4 py-3 text-sm cursor-pointer transition-colors ${!currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-medium'}`}
             >
               Active Sessions
             </div>
@@ -96,13 +96,13 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
                   <div 
                     key={s.id}
                     onClick={() => handleSelect(s.id)}
-                    className={`px-4 py-3 text-sm cursor-pointer transition-colors ${s.id === currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-semibold'}`}
+                    className={`px-4 py-3 text-sm cursor-pointer transition-colors ${s.id === currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-medium'}`}
                   >
                     {s.name}
                   </div>
                 ))}
                 {filteredSessions.length > 10 && (
-                  <div className="px-4 py-3 text-xs text-center text-white/40 italic bg-black/20">
+                  <div className="px-4 py-3 text-xs text-center text-white/40 italic bg-slate-800">
                     + {filteredSessions.length - 10} more sessions. Type to refine.
                   </div>
                 )}

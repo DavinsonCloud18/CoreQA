@@ -46,7 +46,7 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
 
   if (!modules || modules.length === 0) {
     return (
-      <div className="w-full h-32 flex items-center justify-center border-2 border-dashed border-white/20 rounded-2xl">
+      <div className="w-full h-32 flex items-center justify-center border-2 border-dashed border-slate-700 rounded-2xl">
         <p className="text-white/50 text-center font-medium">No modules assigned to this session.</p>
       </div>
     );
@@ -58,15 +58,15 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
         <Link 
           href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`}
           key={m.id}
-          className="group p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-white/10  border border-white/20 shadow-xl hover:shadow-indigo-500/20 hover:border-indigo-400/50 transition-all relative overflow-hidden flex flex-col justify-between"
+          className="group p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-white/10  border border-slate-700 shadow-sm hover: hover:border-indigo-400/50  relative overflow-hidden flex flex-col justify-between"
         >
-          <div className="absolute -top-16 -right-16 w-32 h-32 bg-indigo-500/20 blur-[40px] rounded-full group-hover:bg-indigo-400/40 transition-all duration-500"></div>
+          
           
           <div className="relative z-10 flex flex-col h-full">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-indigo-300 group-hover:bg-indigo-500/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-indigo-300 group-hover:bg-indigo-500/20 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                   </div>
                   <h3 className="text-xl font-bold text-white group-hover:text-indigo-200 transition-colors">{m.name}</h3>
@@ -114,7 +114,7 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
               </div>
             </div>
             
-            <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-auto">
+            <div className="flex items-center justify-between border-t border-slate-800 pt-4 mt-auto">
               {!m.isClaimed || (m.isClaimed && m.claimedById !== currentUser?.id) ? (
                  <button 
                    onClick={(e) => handleClaim(e, m.id)}

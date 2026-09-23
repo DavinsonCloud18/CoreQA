@@ -161,7 +161,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 " onClick={onClose}></div>
       
-      <div className="relative z-10 w-full max-w-2xl bg-slate-900/90 border border-white/20 rounded-[2rem] p-8 shadow-2xl  flex flex-col max-h-[90vh]">
+      <div className="relative z-10 w-full max-w-2xl bg-slate-900/90 border border-slate-700 rounded-[2rem] p-8 shadow-sm  flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center mb-6 shrink-0">
           <h2 className="text-2xl font-bold text-white">Create New Session</h2>
           <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
@@ -178,7 +178,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
                 placeholder="e.g. Q4 Release Regression"
               />
             </div>
@@ -188,7 +188,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
               <select 
                 value={environmentId}
                 onChange={(e) => setEnvironmentId(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all appearance-none"
+                className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500  appearance-none"
                 required
               >
                 {environments.map(env => (
@@ -203,7 +203,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
               />
             </div>
 
@@ -213,12 +213,12 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
               />
             </div>
           </div>
 
-          <div className="flex flex-col overflow-hidden flex-1 border border-white/10 rounded-xl p-4 bg-white/5">
+          <div className="flex flex-col overflow-hidden flex-1 border border-slate-800 rounded-xl p-4 bg-white/5">
              <div className="flex justify-between items-center mb-4 shrink-0">
                <label className="text-sm font-medium text-indigo-200">Select Modules</label>
                <div className="relative">
@@ -229,7 +229,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                      setSearch(e.target.value);
                      setPage(1);
                    }}
-                   className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 pl-8"
+                   className="bg-black/30 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 pl-8"
                    placeholder="Search modules..."
                  />
                  <svg className="w-4 h-4 text-white/50 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -241,21 +241,21 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                   type="checkbox" 
                   checked={allSelected} 
                   onChange={handleSelectAll}
-                  className="w-4 h-4 rounded border-white/20 bg-black/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
+                  className="w-4 h-4 rounded border-slate-700 bg-black/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
                 />
                 <span className="text-sm text-white">Select All on Page</span>
              </div>
 
               <div className="overflow-y-auto pr-2 space-y-3 flex-1 custom-scrollbar">
                 {modules.map(m => (
-                  <div key={m.id} className={`flex flex-col rounded-lg border transition-all ${selectedModules.has(m.id) ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-white/5 bg-black/20 hover:bg-black/40'}`}>
+                  <div key={m.id} className={`flex flex-col rounded-lg border  ${selectedModules.has(m.id) ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 bg-slate-800 hover:bg-slate-800'}`}>
                     <label className="flex items-center justify-between p-3 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <input 
                           type="checkbox"
                           checked={selectedModules.has(m.id)}
                           onChange={() => toggleModule(m.id)}
-                          className="w-4 h-4 rounded border-white/20 bg-black/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
+                          className="w-4 h-4 rounded border-slate-700 bg-black/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
                         />
                         <span className="text-white font-medium">{m.name}</span>
                       </div>
@@ -266,7 +266,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                         <select
                           value={assignments[m.id] || ''}
                           onChange={(e) => setAssignments({ ...assignments, [m.id]: e.target.value })}
-                          className="w-full bg-black/40 border border-indigo-500/30 rounded-lg px-3 py-2 text-sm text-indigo-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full bg-slate-800 border border-indigo-500/30 rounded-lg px-3 py-2 text-sm text-indigo-200 focus:outline-none focus:border-indigo-500 transition-colors"
                         >
                           <option value="">-- Unassigned (Assign Later) --</option>
                           {qaMembers.map(qa => (
@@ -283,12 +283,12 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
              </div>
 
              {metadata.totalPages > 1 && (
-               <div className="flex justify-between items-center bg-black/40 p-2 rounded-lg shrink-0 mt-3 border border-white/5">
+               <div className="flex justify-between items-center bg-slate-800 p-2 rounded-lg shrink-0 mt-3 border border-slate-800">
                   <button 
                     type="button"
                     disabled={page === 1}
                     onClick={() => setPage(p => Math.max(1, p - 1))}
-                    className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 transition-colors"
+                    className="p-1.5 rounded-md bg-white/5 hover:bg-slate-900 text-white disabled:opacity-30 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                   </button>
@@ -297,7 +297,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                     type="button"
                     disabled={page >= metadata.totalPages}
                     onClick={() => setPage(p => Math.min(metadata.totalPages, p + 1))}
-                    className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 transition-colors"
+                    className="p-1.5 rounded-md bg-white/5 hover:bg-slate-900 text-white disabled:opacity-30 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
                   </button>
@@ -309,7 +309,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
             <button 
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50  transition-all disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm  hover:   disabled:opacity-50 disabled:hover:scale-100"
             >
               {isSubmitting ? 'Creating...' : `Create Session with ${selectedModules.size} Modules`}
             </button>

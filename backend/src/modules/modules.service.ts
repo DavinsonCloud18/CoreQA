@@ -20,7 +20,7 @@ export class ModulesService {
     const limit = query.limit || 50;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = { isDeleted: false };
     if (query.search) {
       where.OR = [
         { name: { contains: query.search, mode: 'insensitive' } },
@@ -49,10 +49,11 @@ export class ModulesService {
       where: { id },
       include: {
         testcases: {
-          where: { isDeleted: false },
           orderBy: { sequence: 'asc' },
           include: {
-            createdBy: { select: { name: true } }
+            createdBy: { select: { name: true } },
+            updatedBy: { select: { name: true } },
+            steps: { orderBy: { sequence: 'asc' } }
           }
         }
       }
@@ -69,8 +70,9 @@ export class ModulesService {
   }
 
   async remove(id: string) {
-    return this.prisma.module.delete({
-      where: { id }
+    return this.prisma.module.update({
+      where: { id },
+      data: { isDeleted: true, deletedAt: new Date() }
     });
   }
 }
