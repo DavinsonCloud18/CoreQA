@@ -159,7 +159,7 @@ export function TeamManagement({ initialUsers, initialRoles, initialStatuses }: 
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredUsers.map((user: any) => (
-                <div key={user.id} className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 p-6 rounded-[2rem] hover:bg-white/5 transition-colors group relative overflow-hidden flex flex-col">
+                <div key={user.id} className={`bg-gradient-to-b from-white/5 to-transparent border p-6 rounded-[2rem] hover:bg-white/5 transition-colors group relative overflow-hidden flex flex-col ${currentUser?.id === user.id ? 'border-indigo-500/40 border-l-4 border-l-indigo-500' : 'border-white/10'}`}>
                   <div className="flex justify-between items-start mb-6">
                     <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center border-2 border-white/10 shadow-xl ${user.isActive ? 'bg-gradient-to-tr from-indigo-500 to-purple-600' : 'bg-slate-700 grayscale'}`}>
                       <span className="text-xl font-black text-white">{user.name.substring(0,2).toUpperCase()}</span>
@@ -178,7 +178,12 @@ export function TeamManagement({ initialUsers, initialRoles, initialStatuses }: 
                   </div>
                   
                   <div className="mb-6 flex-1">
-                    <h3 className="font-bold text-xl text-white tracking-tight">{user.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-xl text-white tracking-tight">{user.name}</h3>
+                      {currentUser?.id === user.id && (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider font-black bg-indigo-500 text-white">You</span>
+                      )}
+                    </div>
                     <p className="text-indigo-200/60 text-sm font-medium mt-1">{user.email}</p>
                   </div>
                   
