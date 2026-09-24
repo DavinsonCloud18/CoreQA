@@ -7,7 +7,9 @@ import { SessionSelector } from '@/components/dashboard/SessionSelector';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { ModuleList } from '@/components/dashboard/ModuleList';
 import { CompleteSessionButton } from '@/components/dashboard/CompleteSessionButton';
+import { EditSessionButton } from '@/components/dashboard/EditSessionButton';
 import Link from 'next/link';
+import { BackButton } from '@/components/dashboard/BackButton';
 
 async function fetchGlobalAnalytics(sessionId?: string) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -58,9 +60,7 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
             <div className="flex-1">
               <div className="flex items-center gap-4">
-                <Link href="/dashboard/sessions" className="w-12 h-12 bg-white/5 hover:bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center transition-colors">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </Link>
+                <BackButton />
                 <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-sm ">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
@@ -89,11 +89,29 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
                        <span className="w-2 h-6 bg-amber-500 rounded-full inline-block shadow-[0_0_10px_rgba(245,158,11,0.6)]"></span>
                        Session Summary
                      </h2>
-                     <CompleteSessionButton 
-                       sessionId={resolvedParams.session} 
-                       initialStatus={currentSession?.status || 'On Progress'} 
-                       isReady={isReady} 
-                     />
+                     {currentSession && (
+                       <div className="flex items-center gap-2">
+                         <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                           Start: {new Date(currentSession.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                         </span>
+                         {currentSession.endDate && (
+                           <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                             End: {new Date(currentSession.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                           </span>
+                         )}
+                         <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                           {currentSession.status}
+                         </span>
+                       </div>
+                     )}
+                     <div className="flex items-center gap-3">
+                       <EditSessionButton session={currentSession} />
+                       <CompleteSessionButton 
+                         sessionId={resolvedParams.session} 
+                         initialStatus={currentSession?.status || 'On Progress'} 
+                         isReady={isReady} 
+                       />
+                     </div>
                    </div>
                    <SummaryCards summary={data?.summary || {}} />
                    

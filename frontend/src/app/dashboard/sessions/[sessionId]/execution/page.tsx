@@ -4,6 +4,7 @@ import { NotificationBell } from '@/components/dashboard/NotificationBell';
 import { HeaderProfile } from '@/components/dashboard/HeaderProfile';
 import { ExecutionTable } from '@/components/dashboard/ExecutionTable';
 import Link from 'next/link';
+import { BackButton } from '@/components/dashboard/BackButton';
 
 async function fetchSessionStatus(sessionId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -28,9 +29,7 @@ export default async function ExecutionMenuPage({ params }: { params: Promise<{ 
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
             <div className="flex-1">
               <div className="flex items-center gap-4">
-                <Link href={`/dashboard/execution?session=${resolvedParams.sessionId}`} className="w-12 h-12 bg-white/5 hover:bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center transition-colors">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </Link>
+                <BackButton />
                 <div>
                   <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">Execution Menu</h1>
                   <p className="text-indigo-200 font-medium text-sm mt-0.5">Execute testcases and update statuses</p>

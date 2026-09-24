@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { SessionsService } from './sessions.service.js';
 import { CreateSessionDto } from './sessions.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -7,8 +7,12 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async createSession(@Body() dto: CreateSessionDto) {
+  async createSession(@Request() req: any, @Body() dto: CreateSessionDto) {
+    if (req.user?.role === 'QA Member') {
+      throw new ForbiddenException('Only Admin or Leader can create sessions');
+    }
     const data = await this.sessionsService.createSession(dto);
     return { message: 'Session created successfully', data };
   }
@@ -39,5 +43,19 @@ export class SessionsController {
   ) {
     const data = await this.sessionsService.updateSessionStatus(sessionId, status);
     return { message: 'Session status updated', data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async updateSession(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: any
+  ) {
+    if (req.user?.role === 'QA Member') {
+      throw new ForbiddenException('Only Admin or Leader can edit sessions');
+    }
+    const data = await this.sessionsService.updateSession(id, dto);
+    return { message: 'Session updated successfully', data };
   }
 }

@@ -63,13 +63,15 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
+        {currentUser?.role !== 'QA Member' && (
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="w-full flex items-center justify-center gap-3 px-5 py-4 mb-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-sm  hover:  "
+          className="w-full flex items-center justify-center gap-3 px-5 py-4 mb-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-sm  hover:bg-indigo-500 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
           New Session
         </button>
+        )}
 
         <Link href="/dashboard" className={getLinkClasses('/dashboard')}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>

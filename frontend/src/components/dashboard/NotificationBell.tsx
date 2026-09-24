@@ -51,7 +51,7 @@ export function NotificationBell() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-[100]">
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 rounded-xl bg-slate-900 hover:bg-white/20 border border-slate-800 transition-colors shadow-sm"
@@ -65,7 +65,7 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-800 rounded-2xl shadow-sm overflow-hidden z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-800 rounded-2xl shadow-sm overflow-hidden z-[100]">
           <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/80 ">
             <h3 className="font-bold text-white">Notifications</h3>
             {unreadCount > 0 && (

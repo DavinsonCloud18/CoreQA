@@ -152,22 +152,32 @@ export class TestcasesService {
 
     let rowNum = 2; // header is row 1
     for (const row of data) {
-      const hasMainInfo = row['Modul ID'] || row['Modul ID '] || row['Title'] || row['Nama test case'];
+      const tcIdRaw = row['TC ID'] || row['ID'];
+      const moduleCodeRaw = row['Modul ID'] || row['Modul ID '];
+      const titleRaw = row['Title'] || row['Nama test case'];
+      const expectedResultRaw = row['Expected Result'];
+      
+      const hasMainInfo = tcIdRaw || moduleCodeRaw || titleRaw || expectedResultRaw;
 
       if (hasMainInfo) {
          if (currentTC) groupedData.push(currentTC);
 
          currentTC = {
             rowNum,
-            moduleCode: row['Modul ID'] || row['Modul ID '],
-            title: row['Title'] || row['Nama test case'] || 'Untitled Testcase',
+            moduleCode: moduleCodeRaw,
+            title: titleRaw,
             desc: row['Description'] || row['Deskripsi'] || '',
             severity: row['Severity'] || 'Minor',
             priority: row['Priority'] || row['Prioritas'] || 'Sedang',
-            expectedResult: row['Expected Result'] || '',
-            tcIdFromExcel: row['TC ID'] || row['ID'],
+            expectedResult: expectedResultRaw,
+            tcIdFromExcel: tcIdRaw,
             steps: []
          };
+
+         if (!currentTC.tcIdFromExcel) errors.push({ row: rowNum, message: "TC ID wajib diisi." });
+         if (!currentTC.moduleCode) errors.push({ row: rowNum, message: "Modul ID wajib diisi." });
+         if (!currentTC.title) errors.push({ row: rowNum, message: "Title wajib diisi." });
+         if (!currentTC.expectedResult) errors.push({ row: rowNum, message: "Expected Result wajib diisi." });
 
          if (currentTC.tcIdFromExcel) {
            const existing = await this.prisma.masterTestcase.findFirst({
@@ -182,39 +192,45 @@ export class TestcasesService {
       if (currentTC) {
          const action = String(row['Action'] || '').trim();
          const stepExpected = String(row['Step Expected Result'] || '').trim();
+         
          if (action || stepExpected) {
-            currentTC.steps.push({
-               sequence: currentTC.steps.length + 1,
-               action: action,
-               expectedResult: stepExpected
-            });
+            if (!action) errors.push({ row: rowNum, message: "Action wajib diisi pada step." });
+            if (!stepExpected) errors.push({ row: rowNum, message: "Step Expected Result wajib diisi pada step." });
+            
+            if (action && stepExpected) {
+              currentTC.steps.push({
+                 sequence: currentTC.steps.length + 1,
+                 action: action,
+                 expectedResult: stepExpected
+              });
+            }
          }
       } else {
          if (row['Action'] || row['Step Expected Result']) {
-            errors.push({ row: rowNum, message: "Ditemukan step tanpa informasi Testcase induk (Modul ID/Title kosong). Pastikan Action/Expected result tidak tercampur." });
+            errors.push({ row: rowNum, message: "Ditemukan step tanpa informasi Testcase induk. Pastikan TC ID/Modul ID diisi." });
          }
       }
       rowNum++;
     }
     if (currentTC) groupedData.push(currentTC);
 
-    // Validate modules
+    // Validate modules and steps length
     for (const tcData of groupedData) {
-      if (!tcData.moduleCode) {
-        errors.push({ row: tcData.rowNum, message: "Modul ID tidak boleh kosong." });
-        continue;
+      if (tcData.steps.length === 0) {
+        errors.push({ row: tcData.rowNum, message: `Testcase '${tcData.title || tcData.tcIdFromExcel}' tidak memiliki step satupun. Action dan Step Expected Result wajib diisi.` });
       }
 
-      const module = await this.prisma.module.findFirst({
-        where: { OR: [{ id: String(tcData.moduleCode) }, { code: String(tcData.moduleCode) }] }
-      });
+      if (tcData.moduleCode) {
+        const module = await this.prisma.module.findFirst({
+          where: { OR: [{ id: String(tcData.moduleCode) }, { code: String(tcData.moduleCode) }] }
+        });
 
-      if (!module) {
-        errors.push({ row: tcData.rowNum, message: `Modul '${tcData.moduleCode}' tidak ada pada sistem, tolong perbaiki atau tambah modul '${tcData.moduleCode}' pada Menu Modules.` });
-        continue;
+        if (!module) {
+          errors.push({ row: tcData.rowNum, message: `Modul '${tcData.moduleCode}' tidak ada pada sistem, tolong perbaiki atau tambah modul '${tcData.moduleCode}' pada Menu Modules.` });
+        } else {
+          tcData.moduleId = module.id;
+        }
       }
-
-      tcData.moduleId = module.id;
     }
 
     if (errors.length > 0) {
