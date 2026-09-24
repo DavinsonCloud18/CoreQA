@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 // Color palette for avatar backgrounds — deterministic by index
 const AVATAR_COLORS = [
@@ -45,11 +46,11 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
         const isExpanded = expandedId === assignment.user.id;
 
         // Group modules by session for this user
-        const sessionGroups: Record<string, string[]> = {};
+        const sessionGroups: Record<string, any[]> = {};
         assignment.modules.forEach((m: any) => {
           const sName = m.session.name;
           if (!sessionGroups[sName]) sessionGroups[sName] = [];
-          sessionGroups[sName].push(m.module.name);
+          sessionGroups[sName].push({ ...m.module, stats: m.stats, session: m.session });
         });
 
         return (
@@ -80,6 +81,9 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
 
               {/* Module count badge */}
               <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] font-bold text-emerald-300/90 bg-emerald-500/15 px-2 py-0.5 rounded-md">
+                  {assignment.modules.reduce((sum: number, m: any) => sum + (Object.values(m.stats || {}).reduce((a: any, b: any) => a + (b as number), 0) as number), 0)} TCs
+                </span>
                 <span className="text-[10px] font-bold text-indigo-300/90 bg-indigo-500/15 px-2 py-0.5 rounded-md">
                   {assignment.modules.length} {assignment.modules.length === 1 ? 'module' : 'modules'}
                 </span>
@@ -96,17 +100,26 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
             {/* Expanded Detail */}
             {isExpanded && (
               <div className="ml-11 mr-3 mb-2 mt-1 space-y-2    ">
-                {Object.entries(sessionGroups).map(([sessionName, moduleNames]) => (
+                {Object.entries(sessionGroups).map(([sessionName, modules]) => (
                   <div key={sessionName} className="bg-black/30 rounded-lg p-2.5 border border-slate-800">
                     <p className="text-[9px] uppercase tracking-wider font-bold text-white/30 mb-1.5">{sessionName}</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {moduleNames.map((modName, idx) => (
-                        <span
+                      {modules.map((mod: any, idx: number) => (
+                        <Link
                           key={idx}
-                          className="text-[10px] font-semibold text-white/75 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-200 px-2 py-1 rounded-md border border-slate-800 hover:border-indigo-500/30 transition-colors cursor-default"
+                          href={`/dashboard/sessions/${mod.session.id}/execution?moduleId=${mod.id}`}
+                          className="flex items-center gap-1.5 text-[10px] font-semibold text-white/75 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-200 px-2 py-1 rounded-md border border-slate-800 hover:border-indigo-500/30 transition-colors cursor-pointer"
                         >
-                          {modName}
-                        </span>
+                          <span>{mod.name}</span>
+                          <span className="bg-slate-900/80 text-indigo-300/80 px-1.5 py-0.5 rounded shadow-sm">
+                            {Object.values(mod.stats || {}).reduce((a: any, b: any) => a + (b as number), 0) as number} TCs
+                          </span>
+                          {mod.stats && Object.keys(mod.stats).length > 0 && (
+                            <span className="text-[9px] text-white/40 border-l border-slate-700/50 pl-1.5 ml-0.5">
+                              {Object.entries(mod.stats).map(([k, v]) => `${v} ${k}`).join(', ')}
+                            </span>
+                          )}
+                        </Link>
                       ))}
                     </div>
                   </div>

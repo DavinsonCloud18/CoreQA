@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { ModuleDetail } from './ModuleDetail';
 
 export function ModuleManagement() {
@@ -18,6 +18,8 @@ export function ModuleManagement() {
   const [page, setPage] = useState(1);
   const [metadata, setMetadata] = useState<any>({ totalPages: 1 });
   const [moduleToDelete, setModuleToDelete] = useState<any>(null);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     const authData = localStorage.getItem('auth');
@@ -31,13 +33,46 @@ export function ModuleManagement() {
       fetchData();
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, page]);
+  }, [searchQuery, page, sortBy, sortOrder]);
 
+  
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const renderSortIcon = (field: string) => {
+    if (sortBy !== field) return <svg className="w-3 h-3 text-slate-600 group-hover:text-slate-500 transition-colors" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l4 4a1 1 0 01-1.414 1.414L10 5.414 6.707 8.707a1 1 0 01-1.414-1.414l4-4A1 1 0 0110 3zm0 14a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L10 14.586l3.293-3.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 17z" clipRule="evenodd" /></svg>;
+    if (sortOrder === 'asc') return <svg className="w-3 h-3 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" /></svg>;
+    return <svg className="w-3 h-3 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>;
+  };
+
+  const SortHeader = ({ label, sortKey, align = 'left' }: { label: string, sortKey: string, align?: 'left' | 'center' }) => {
+    return (
+      <th 
+        className={`py-4 px-6 text-indigo-200 font-semibold cursor-pointer hover:bg-slate-700/50 transition-colors select-none group ${align === 'center' ? 'text-center' : 'text-left'}`}
+        onClick={() => handleSort(sortKey)}
+      >
+        <div className={`flex items-center gap-2 ${align === 'center' ? 'justify-center' : ''}`}>
+          {label}
+          <div className="flex flex-col items-center">
+            {renderSortIcon(sortKey)}
+          </div>
+        </div>
+      </th>
+    );
+  };
+
+  
   const fetchData = async () => {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const authData = JSON.parse(localStorage.getItem('auth') || '{}');
-      const res = await fetch(`${baseUrl}/modules?page=${page}&limit=12&search=${encodeURIComponent(searchQuery)}`, {
+      const res = await fetch(`${baseUrl}/modules?page=${page}&limit=12&search=${encodeURIComponent(searchQuery)}&sortBy=${sortBy}&sortOrder=${sortOrder}`, {
         headers: { 'Authorization': `Bearer ${authData.access_token}` }
       });
       if (res.ok) {
@@ -108,46 +143,47 @@ export function ModuleManagement() {
     return <ModuleDetail moduleId={selectedModuleId} onBack={() => setSelectedModuleId(null)} />;
   }
 
+
+
   return (
-    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col gap-6">
       
-      
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-slate-800 pb-6 gap-4">
-        <h2 className="text-xl font-bold text-white shrink-0">System Modules</h2>
+      <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="relative w-full md:w-72">
+          <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <input 
+            type="text" 
+            placeholder="Search modules..." 
+            value={searchQuery}
+            onChange={e => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            className="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+          />
+        </div>
+        
         <div className="flex w-full md:w-auto items-center gap-4">
-          <div className="relative flex-1 md:w-64">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input 
-              type="text" 
-              placeholder="Search modules..." 
-              value={searchQuery}
-              onChange={e => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-              className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
           <div className="flex bg-slate-800 rounded-xl p-1 border border-slate-800">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-indigo-500 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-indigo-500 text-white shadow-sm' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
               title="Grid View"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-indigo-500 text-white' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-indigo-500 text-white shadow-sm' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
               title="List View"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
           </div>
           {canEdit && (
             <button 
               onClick={() => openForm()}
-              className="px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:  text-sm whitespace-nowrap"
+              className="px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:bg-indigo-500 text-sm whitespace-nowrap transition-colors"
             >
               + Add Module
             </button>
@@ -156,7 +192,7 @@ export function ModuleManagement() {
       </div>
 
       {viewMode === 'grid' ? (
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {modules.map(mod => (
             <div 
               key={mod.id} 
@@ -201,47 +237,60 @@ export function ModuleManagement() {
           )}
         </div>
       ) : (
-        <div className="relative z-10 bg-slate-800 border border-slate-800 rounded-2xl overflow-hidden mb-8">
+        <div className="relative z-10 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50 shadow-sm">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-white/5">
-                <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold">Code</th>
-                <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold">Name</th>
-                <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold">Description</th>
-                {canEdit && <th className="py-4 px-6 text-xs uppercase tracking-wider text-white/50 font-bold text-right">Actions</th>}
+              <tr className="border-b border-slate-800 bg-slate-800/50">
+                <th className="py-4 px-6 text-indigo-200 font-semibold w-16 text-center">No</th>
+                <SortHeader label="Code" sortKey="code" />
+                <SortHeader label="Name" sortKey="name" />
+                <SortHeader label="Description" sortKey="description" />
+                <SortHeader label="Jumlah Testcase" sortKey="testcaseCount" align="center" />
+                {canEdit && <th className="py-4 px-6 text-indigo-200 font-semibold text-right">Actions</th>}
               </tr>
             </thead>
             <tbody>
-              {modules.map(mod => (
-                <tr 
-                  key={mod.id} 
-                  onClick={() => setSelectedModuleId(mod.id)}
-                  className="border-b border-slate-800 hover:bg-white/5 cursor-pointer transition-colors"
-                >
-                  <td className="py-4 px-6">
-                    <span className="font-bold text-indigo-300 bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 text-xs tracking-wider">
-                      {mod.code}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 font-bold text-white">{mod.name}</td>
-                  <td className="py-4 px-6 text-white/50 text-sm truncate max-w-xs">{mod.description || '-'}</td>
-                  {canEdit && (
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={(e) => openForm(mod, e)} className="p-2 rounded-lg bg-white/5 hover:bg-white/20 text-white transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </button>
-                        <button onClick={(e) => handleDeleteClick(mod, e)} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                      </div>
+              {modules.map((mod, index) => {
+                const no = (page - 1) * 12 + index + 1;
+                const tcCount = mod._count?.testcases || 0;
+                
+                return (
+                                    <tr 
+                    key={mod.id}
+                    onClick={() => setSelectedModuleId(mod.id)}
+                    className="border-b border-slate-800/50 hover:bg-white/5 cursor-pointer transition-colors group"
+                  >
+                    <td className="py-4 px-6 text-center text-white/50 font-medium">{no}</td>
+                    <td className="py-4 px-6">
+                      <span className="font-bold text-indigo-300 bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 text-xs tracking-wider">
+                        {mod.code}
+                      </span>
                     </td>
-                  )}
-                </tr>
-              ))}
+                    <td className="py-4 px-6 font-bold text-white">{mod.name}</td>
+                    <td className="py-4 px-6 text-white/50 text-sm truncate max-w-xs">{mod.description || '-'}</td>
+                    <td className="py-4 px-6 text-center">
+                      <span className="inline-flex items-center justify-center min-w-[2rem] h-6 px-2 text-xs font-bold rounded-full bg-slate-900 border border-slate-700 text-indigo-300">
+                        {tcCount}
+                      </span>
+                    </td>
+                    {canEdit && (
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); openForm(mod); }} className="p-2 rounded-lg bg-white/5 hover:bg-white/20 text-white transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(mod, e); }} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
               {modules.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-12 text-center text-white/50">
+                  <td colSpan={canEdit ? 6 : 5} className="py-12 text-center text-white/50">
                     No modules found.
                   </td>
                 </tr>

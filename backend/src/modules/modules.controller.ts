@@ -14,11 +14,13 @@ export class ModulesController {
   }
 
   @Get()
-  async findAll(@Query('page') page?: string, @Query('limit') limit?: string, @Query('search') search?: string) {
+  async findAll(@Query('page') page?: string, @Query('limit') limit?: string, @Query('search') search?: string, @Query('sortBy') sortBy?: string, @Query('sortOrder') sortOrder?: string) {
     const query = {
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 50,
-      search
+      search,
+      sortBy,
+      sortOrder
     };
     const result = await this.modulesService.findAll(query);
     return { data: result.data, metadata: result.metadata };

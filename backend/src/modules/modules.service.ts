@@ -15,7 +15,7 @@ export class ModulesService {
     });
   }
 
-  async findAll(query: { page?: number, limit?: number, search?: string }) {
+  async findAll(query: { page?: number, limit?: number, search?: string, sortBy?: string, sortOrder?: string }) {
     const page = query.page || 1;
     const limit = query.limit || 50;
     const skip = (page - 1) * limit;
@@ -34,7 +34,10 @@ export class ModulesService {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: query.sortBy ? (query.sortBy === 'testcaseCount' ? { testcases: { _count: (query.sortOrder === 'asc' ? 'asc' : 'desc') } } : { [query.sortBy]: (query.sortOrder === 'desc' ? 'desc' : 'asc') }) : { createdAt: 'desc' },
+        include: {
+          _count: { select: { testcases: { where: { isDeleted: false } } } }
+        }
       })
     ]);
 

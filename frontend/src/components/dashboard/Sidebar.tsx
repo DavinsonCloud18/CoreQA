@@ -63,7 +63,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
-        {currentUser?.role !== 'QA Member' && (
+        {(currentUser && currentUser.role !== 'QA Member') && (
         <button 
           onClick={() => setIsModalOpen(true)}
           className="w-full flex items-center justify-center gap-3 px-5 py-4 mb-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-sm  hover:bg-indigo-500 transition-colors"

@@ -30,9 +30,33 @@ export class AnalyticsService {
       where: sessionId ? { sessionId, isActive: true } : { isActive: true, session: { isOpen: true } },
       include: {
         claimedBy: { select: { id: true, name: true, email: true } },
-        module: { select: { id: true, name: true } },
+        module: { 
+          select: { 
+            id: true, 
+            name: true,
+            _count: { select: { testcases: { where: { isDeleted: false } } } }
+          } 
+        },
         session: { select: { id: true, name: true } }
       }
+    });
+
+    // Fetch executions to get status breakdown per module
+    const sessionExecutions = await this.prisma.sessionExecution.findMany({
+      where: whereClause,
+      include: {
+        status: { select: { name: true } },
+        testcase: { select: { moduleId: true } }
+      }
+    });
+
+    const moduleStats = new Map();
+    sessionExecutions.forEach(se => {
+      const key = `${se.sessionId}_${se.testcase.moduleId}`;
+      if (!moduleStats.has(key)) moduleStats.set(key, {});
+      const stats = moduleStats.get(key);
+      const sName = se.status.name;
+      stats[sName] = (stats[sName] || 0) + 1;
     });
 
     // Group by user
@@ -47,7 +71,8 @@ export class AnalyticsService {
       }
       userAssignmentsMap.get(userId).modules.push({
         module: ch.module,
-        session: ch.session
+        session: ch.session,
+        stats: moduleStats.get(`${ch.sessionId}_${ch.moduleId}`) || {}
       });
     });
 
