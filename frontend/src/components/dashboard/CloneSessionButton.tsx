@@ -54,11 +54,7 @@ export function CloneSessionButton({ sessionId }: { sessionId: string }) {
       <button
         onClick={() => setIsModalOpen(true)}
         disabled={isCloning}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors
-          ${isCloning 
-            ? 'bg-indigo-500/10 text-indigo-500/50 cursor-not-allowed border border-indigo-500/10' 
-            : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30'
-          }`}
+        className={`flex items-center justify-center gap-2 px-4 h-10 rounded-xl text-sm font-bold transition-colors ${isCloning ? 'bg-purple-500/10 text-purple-500/50 cursor-not-allowed border border-purple-500/10' : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/30'}`}
       >
         <svg className={`w-4 h-4 ${isCloning ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {isCloning ? (
