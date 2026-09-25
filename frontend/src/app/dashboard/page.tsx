@@ -179,7 +179,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Chart on the left */}
-              <section className="lg:col-span-5 bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-center">
+              <section className="lg:col-span-4 bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-center">
                 <div className="w-full flex flex-col items-start mb-8 relative z-10">
                   <h2 className="text-xl font-bold text-white mb-2">
                     Execution Status Distribution
@@ -205,7 +205,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
               </section>
 
               {/* User assignments on the right */}
-              <section className="lg:col-span-7 bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+              <section className="lg:col-span-8 bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
                 
                 <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
                   <span className="w-2 h-6 bg-indigo-500 rounded-full inline-block shadow-[0_0_10px_rgba(99,102,241,0.6)]"></span>

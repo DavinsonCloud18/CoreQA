@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export function TrashManagement() {
   const [activeTab, setActiveTab] = useState<'sessions' | 'modules' | 'testcases' | 'users'>('sessions');
   const [data, setData] = useState<any[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchTrashData();
@@ -44,6 +47,32 @@ export function TrashManagement() {
     setSelectedIds(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
+  };
+
+  const executePermanentDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsDeleting(true);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const authData = JSON.parse(localStorage.getItem('auth') || '{}');
+      const res = await fetch(`${baseUrl}/trash/delete-permanent`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type: activeTab, ids: selectedIds })
+      });
+      
+      if (res.ok) {
+        fetchTrashData();
+        setIsDeleteModalOpen(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleRestore = async () => {
@@ -152,7 +181,8 @@ export function TrashManagement() {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+    <>
+    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative">
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-4 relative z-10">
         <div className="flex gap-4">
@@ -179,13 +209,24 @@ export function TrashManagement() {
         <div className="text-sm text-white/70">
           <span className="font-bold text-white">{selectedIds.length}</span> item(s) selected
         </div>
-        <button 
-          onClick={handleRestore}
-          disabled={selectedIds.length === 0}
-          className="px-6 py-2 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Restore Selected
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsDeleteModalOpen(true)}
+            disabled={selectedIds.length === 0}
+            className="px-6 py-2 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-xl font-bold hover:bg-rose-600/30 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Permanently Delete
+          </button>
+          <button 
+            onClick={handleRestore}
+            disabled={selectedIds.length === 0}
+            className="px-6 py-2 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            Restore Selected
+          </button>
+        </div>
       </div>
 
       <div className="relative z-10 bg-slate-800 border border-slate-800 rounded-2xl overflow-x-auto">
@@ -235,5 +276,42 @@ export function TrashManagement() {
         </table>
       </div>
     </div>
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700/50 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl shadow-rose-900/20 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-rose-500/20">
+              <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </div>
+            <h3 className="text-2xl font-black text-white text-center mb-2 tracking-tight">Permanently Delete?</h3>
+            <p className="text-slate-400 text-center mb-8 font-medium leading-relaxed">
+              You are about to permanently delete <strong className="text-rose-400">{selectedIds.length} item(s)</strong>. This action cannot be undone. Are you sure?
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 rounded-xl font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={executePermanentDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 rounded-xl font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Deleting...
+                  </>
+                ) : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

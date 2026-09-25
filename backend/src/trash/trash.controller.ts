@@ -5,6 +5,12 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 @Controller('trash')
 @UseGuards(JwtAuthGuard)
 export class TrashController {
+  @Put('delete-permanent')
+  async permanentlyDelete(@Body() body: { type: string, ids: string[] }) {
+    const data = await this.trashService.permanentlyDelete(body.type, body.ids);
+    return { message: 'Data permanently deleted', data };
+  }
+
   constructor(private readonly trashService: TrashService) {}
 
   @Get()

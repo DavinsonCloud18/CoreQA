@@ -45,7 +45,10 @@ export function Sidebar() {
 
   const getLinkClasses = (path: string) => {
     // Exact match for dashboard, partial match for others
-    const isActive = path === '/dashboard' ? pathname === path : pathname?.startsWith(path);
+    let isActive = path === '/dashboard' ? pathname === path : pathname?.startsWith(path);
+    if (path === '/dashboard/sessions' && pathname?.startsWith('/dashboard/execution')) {
+      isActive = true;
+    }
     
     if (isActive) {
       return "flex items-center gap-4 px-5 py-4 bg-slate-900 text-white rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] border border-slate-800 ";

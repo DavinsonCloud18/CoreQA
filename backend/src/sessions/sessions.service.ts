@@ -6,6 +6,13 @@ import { CreateSessionDto } from './sessions.dto.js';
 export class SessionsService {
   constructor(private prisma: PrismaService) {}
 
+  async deleteSession(id: string) {
+    return this.prisma.session.update({
+      where: { id },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
+  }
+
   async createSession(dto: CreateSessionDto) {
     const defaultStatus = await this.prisma.status.findFirst({
       where: { name: 'TO DO' }
@@ -71,6 +78,77 @@ export class SessionsService {
   }
 
   
+  
+  async cloneSession(id: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id },
+      include: {
+        sessionModules: true,
+        claimHistories: { where: { isActive: true } }
+      }
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    const defaultStatus = await this.prisma.status.findFirst({ where: { name: 'TO DO' } });
+    const fallbackStatus = await this.prisma.status.findFirst({ where: { name: 'UNTESTED' } });
+    const initialStatusId = defaultStatus?.id || fallbackStatus?.id;
+    if (!initialStatusId) {
+      throw new NotFoundException('Default execution status not found in database');
+    }
+
+    return this.prisma.$transaction(async (tx: any) => {
+      const clonedSession = await tx.session.create({
+        data: {
+          name: session.name + ' (Clone)',
+          environmentId: session.environmentId,
+          status: 'TO DO',
+          startDate: new Date(),
+          endDate: session.endDate,
+        }
+      });
+
+      if (session.sessionModules.length > 0) {
+        const moduleIds = session.sessionModules.map(sm => sm.moduleId);
+        const newSessionModules = moduleIds.map(moduleId => ({
+          sessionId: clonedSession.id,
+          moduleId
+        }));
+        await tx.sessionModule.createMany({ data: newSessionModules });
+
+        const testcases = await tx.masterTestcase.findMany({
+          where: { 
+            moduleId: { in: moduleIds },
+            isDeleted: false
+          }
+        });
+
+        if (testcases.length > 0) {
+          const executions = testcases.map((tc: any) => ({
+            sessionId: clonedSession.id,
+            testcaseId: tc.id,
+            statusId: initialStatusId,
+          }));
+          await tx.sessionExecution.createMany({ data: executions });
+        }
+
+        if (session.claimHistories.length > 0) {
+          const claims = session.claimHistories.map((claim: any) => ({
+            sessionId: clonedSession.id,
+            moduleId: claim.moduleId,
+            claimedById: claim.claimedById,
+            isActive: true,
+          }));
+          await tx.claimHistory.createMany({ data: claims });
+        }
+      }
+
+      return clonedSession;
+    });
+  }
+
   async updateSession(id: string, dto: any) {
     const defaultStatus = await this.prisma.status.findFirst({
       where: { name: 'TO DO' }
@@ -154,7 +232,7 @@ export class SessionsService {
   }
 
   async getSessions() {
-    return this.prisma.session.findMany({
+    const sessions = await this.prisma.session.findMany({
       where: { isDeleted: false },
       include: {
         environment: true,
@@ -163,6 +241,22 @@ export class SessionsService {
         }
       },
       orderBy: { createdAt: 'desc' }
+    });
+
+    const statusWeight: Record<string, number> = {
+      'ON PROGRESS': 1,
+      'TO DO': 2,
+      'FINISHED': 3,
+      'DONE': 3
+    };
+
+    return sessions.sort((a, b) => {
+      const weightA = statusWeight[a.status?.toUpperCase()] || 99;
+      const weightB = statusWeight[b.status?.toUpperCase()] || 99;
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
+      return b.createdAt.getTime() - a.createdAt.getTime();
     });
   }
 

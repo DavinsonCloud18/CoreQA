@@ -102,10 +102,10 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
   // 3. Sort
   const sorted = useMemo(() => {
     const statusWeight: Record<string, number> = {
-      'To Do': 1,
-      'On Progress': 2,
-      'Finished': 3,
-      'Done': 3
+      'ON PROGRESS': 1,
+      'TO DO': 2,
+      'FINISHED': 3,
+      'DONE': 3
     };
 
     return [...filtered].sort((a, b) => {
@@ -121,8 +121,8 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
           valA = a.timelineSortVal;
           valB = b.timelineSortVal;
         } else if (sort.key === 'status') {
-          valA = statusWeight[a.status] || 99;
-          valB = statusWeight[b.status] || 99;
+          valA = statusWeight[a.status?.toUpperCase()] || 99;
+          valB = statusWeight[b.status?.toUpperCase()] || 99;
         } else if (sort.key === 'executed') {
           valA = a.completionPct;
           valB = b.completionPct;
@@ -136,12 +136,7 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
       }
       
       // Default secondary sort if no custom sorts defined or if tied
-      const defaultWeightA = statusWeight[a.status] || 99;
-      const defaultWeightB = statusWeight[b.status] || 99;
-      if (defaultWeightA !== defaultWeightB) {
-        return defaultWeightA - defaultWeightB;
-      }
-      return b.timelineSortVal - a.timelineSortVal;
+      return 0;
     });
   }, [filtered, sorts]);
 

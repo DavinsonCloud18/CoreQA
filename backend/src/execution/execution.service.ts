@@ -71,7 +71,7 @@ export class ExecutionService {
             include: { 
               module: { 
                 include: {
-                  claimHistories: { where: { isActive: true } }
+                  claimHistories: { where: { isActive: true }, include: { claimedBy: { select: { id: true, name: true } } } }
                 }
               },
               steps: { orderBy: { sequence: 'asc' } }

@@ -232,6 +232,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
               <th className="py-4 px-6 text-indigo-200 font-semibold w-32">TC ID</th>
               <th className="py-4 px-6 text-indigo-200 font-semibold">Title</th>
               <th className="py-4 px-6 text-indigo-200 font-semibold w-1/3">Expected Result</th>
+              <th className="py-4 px-6 text-indigo-200 font-semibold w-40">Assign to</th>
               <th className="py-4 px-6 text-indigo-200 font-semibold w-48">Status</th>
               <th className="py-4 px-6 text-indigo-200 font-semibold">Notes</th>
             </tr>
@@ -264,7 +265,19 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                     {tc.testcase.description && <div className="text-sm text-indigo-200/70 mt-1">{tc.testcase.description}</div>}
                   </td>
                   <td className="py-4 px-6 text-white/80 text-sm">{tc.testcase.expectedResult}</td>
-                  <td className="py-4 px-6" onClick={(e) => e.stopPropagation()} title={tooltipMsg}>
+                  <td className="py-4 px-6">
+                    {claim && claim.claimedBy ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] border border-indigo-500/30">
+                          {claim.claimedBy.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-white/80 text-sm font-medium">{claim.claimedBy.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-white/40 text-sm italic">Unassigned</span>
+                    )}
+                  </td>
+                  <td className="py-4 px-6 relative" onClick={(e) => e.stopPropagation()} title={tooltipMsg}>
                     <select
                       value={tc.statusId}
                       onChange={(e) => handleStatusChange(tc, Number(e.target.value), tc.statusId)}
@@ -291,7 +304,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                 </tr>
                 {expandedRowId === tc.id && (
                   <tr className="bg-slate-800 border-b border-slate-800">
-                    <td colSpan={5} className="p-0">
+                    <td colSpan={6} className="p-0">
                       <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner ">
                         <h4 className="text-indigo-200 font-bold mb-4 flex items-center gap-2">
                           <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>

@@ -8,6 +8,8 @@ import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { ModuleList } from '@/components/dashboard/ModuleList';
 import { CompleteSessionButton } from '@/components/dashboard/CompleteSessionButton';
 import { EditSessionButton } from '@/components/dashboard/EditSessionButton';
+import { CloneSessionButton } from '@/components/dashboard/CloneSessionButton';
+import { DeleteSessionButton } from '@/components/dashboard/DeleteSessionButton';
 import Link from 'next/link';
 import { BackButton } from '@/components/dashboard/BackButton';
 
@@ -65,8 +67,21 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">Execution Menu</h1>
-                  <p className="text-indigo-200 font-medium text-sm mt-0.5">Execute testcases across your selected session</p>
+                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">
+                    {currentSession ? currentSession.name : 'Execution Menu'}
+                  </h1>
+                  <div className="text-indigo-200 font-medium text-sm mt-1.5 flex items-center gap-2">
+                    {currentSession ? (
+                      <>
+                        <span className="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded text-[10px] border border-indigo-500/30 uppercase font-bold tracking-wider">
+                          {currentSession.environment?.name || 'Session'}
+                        </span>
+                        <span>Manage execution and update testcases</span>
+                      </>
+                    ) : (
+                      <span>Execute testcases across your selected session</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -105,6 +120,8 @@ export default async function ExecutionMenuPage({ searchParams }: { searchParams
                        </div>
                      )}
                      <div className="flex items-center gap-3">
+                       <DeleteSessionButton session={currentSession} />
+                       <CloneSessionButton sessionId={currentSession.id} />
                        <EditSessionButton session={currentSession} />
                        <CompleteSessionButton 
                          sessionId={resolvedParams.session} 

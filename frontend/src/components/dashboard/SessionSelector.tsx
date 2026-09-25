@@ -50,17 +50,17 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
         className="relative flex items-center bg-[#0f1117] border border-indigo-500/30 hover:border-indigo-400/80 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-[300px]"
       >
         {/* Context Icon */}
-        <div className="pl-4 pr-3 py-3 flex items-center justify-center text-indigo-400 bg-indigo-500/10 border-r border-indigo-500/20">
+        <div className="pl-4 pr-3 py-3 flex items-center justify-center text-indigo-400 bg-indigo-500/10 border-r border-indigo-500/20 shrink-0">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
         </div>
         
         {/* Selected Value */}
-        <div className="flex-1 px-4 py-3 text-white font-bold text-sm tracking-wide truncate">
+        <div className="flex-1 pl-4 pr-2 py-3 text-white font-bold text-sm tracking-wide truncate">
           {currentSessionName}
         </div>
         
         {/* Custom Chevron */}
-        <div className={`absolute right-3 pointer-events-none ${isOpen ? 'text-white rotate-180' : 'text-indigo-400 group-hover:text-white'}`}>
+        <div className={`pr-4 pl-1 shrink-0 transition-transform ${isOpen ? 'text-white rotate-180' : 'text-indigo-400 group-hover:text-white'}`}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
         </div>
       </div>
