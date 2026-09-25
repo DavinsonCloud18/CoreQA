@@ -95,8 +95,11 @@ export function ModuleManagement() {
       
       const method = editingItem ? 'PUT' : 'POST';
       const url = editingItem ? `${baseUrl}/modules/${editingItem.id}` : `${baseUrl}/modules`;
+      const body = editingItem
+        ? { name: formData.name, description: formData.description }
+        : formData;
       
-      const res = await fetch(url, { method, headers, body: JSON.stringify(formData) });
+      const res = await fetch(url, { method, headers, body: JSON.stringify(body) });
       if (res.ok) {
         setIsFormOpen(false);
         fetchData();
@@ -185,7 +188,7 @@ export function ModuleManagement() {
               onClick={() => openForm()}
               className="px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:bg-indigo-500 text-sm whitespace-nowrap transition-colors"
             >
-              + Add Module
+              Add Module
             </button>
           )}
         </div>
@@ -340,7 +343,7 @@ export function ModuleManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-white/70 mb-2">Module Code (Prefix) *</label>
-                  <input type="text" required value={formData.code} onChange={e => setFormData({...formData, code: e.target.value.toUpperCase()})} placeholder="e.g. AUTH" className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input disabled={!!editingItem} type="text" required value={formData.code} onChange={e => setFormData({...formData, code: e.target.value.toUpperCase()})} placeholder="e.g. AUTH" className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800/80 disabled:text-slate-500 disabled:opacity-70" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-white/70 mb-2">Description</label>

@@ -57,7 +57,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="relative z-10 w-72 h-screen border-r border-slate-700 bg-slate-900  flex flex-col pt-8 pb-4">
+    <div className="sticky top-0 z-10 w-72 h-screen border-r border-slate-700 bg-slate-900  flex flex-col pt-8 pb-4">
       <div className="px-8 mb-12 flex items-center gap-3">
         <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-sm ">
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>

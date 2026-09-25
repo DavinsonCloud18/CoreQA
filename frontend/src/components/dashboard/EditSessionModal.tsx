@@ -15,6 +15,14 @@ interface Module {
   testcaseCount: number;
 }
 
+const getToday = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean; onClose: () => void; session: any }) {
   const [name, setName] = useState('');
   const [environmentId, setEnvironmentId] = useState('');
@@ -24,7 +32,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
   const [selectedModules, setSelectedModules] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [metadata, setMetadata] = useState<any>({ totalPages: 1 });
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(getToday());
   const [endDate, setEndDate] = useState('');
   const [qaMembers, setQaMembers] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<Record<string, string>>({});
@@ -47,22 +55,30 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
     if (session && isOpen) {
       setName(session.name || '');
       setEnvironmentId(session.environmentId ? String(session.environmentId) : '');
-      if (session.startDate) setStartDate(new Date(session.startDate).toISOString().split('T')[0]);
-      if (session.endDate) setEndDate(new Date(session.endDate).toISOString().split('T')[0]);
+      setStartDate(session.startDate ? new Date(session.startDate).toISOString().split('T')[0] : getToday());
+      setEndDate(session.endDate ? new Date(session.endDate).toISOString().split('T')[0] : '');
+      setSelectedModules(new Set());
+      setAssignments({});
       // fetch active modules for this session
-      fetch(process.env.NEXT_PUBLIC_API_URL + '/sessions/' + session.id + '/modules', {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      fetch(`${baseUrl}/sessions/${session.id}/modules`, {
         headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('auth') || '{}').access_token}` }
       })
       .then(res => res.json())
       .then(data => {
-         const mids = (data.data || []).map((m: any) => m.id || m.moduleId);
+        const sessionModules = data.data || [];
+        const mids = sessionModules
+          .map((m: any) => m.id ?? m.moduleId)
+          .filter((id: unknown): id is string | number => id !== undefined && id !== null)
+          .map(String);
          setSelectedModules(new Set(mids));
          
          // extract claims
          const assigns: Record<string, string> = {};
-         (data.data || []).forEach((m: any) => {
-            if (m.isClaimed && m.claimedById) {
-               assigns[m.id || m.moduleId] = m.claimedById;
+        sessionModules.forEach((m: any) => {
+          const moduleId = m.id ?? m.moduleId;
+          if (m.isClaimed && m.claimedById && moduleId !== undefined && moduleId !== null) {
+            assigns[String(moduleId)] = String(m.claimedById);
             }
          });
          setAssignments(assigns);
@@ -145,6 +161,15 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const today = getToday();
+    if (startDate < today) {
+      alert('Start date cannot be earlier than today');
+      return;
+    }
+    if (endDate && endDate < startDate) {
+      alert('Target end date cannot be earlier than the start date');
+      return;
+    }
     if (selectedModules.size === 0) {
       alert('Please select at least one module');
       return;
@@ -236,6 +261,8 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
               <label className="block text-sm font-medium text-indigo-200 mb-2">Start Date</label>
               <input 
                 type="date" 
+                required
+                min={getToday()}
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
@@ -246,6 +273,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
               <label className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
               <input 
                 type="date" 
+                min={startDate || getToday()}
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "

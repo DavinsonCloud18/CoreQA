@@ -15,6 +15,14 @@ interface Module {
   testcaseCount: number;
 }
 
+const getToday = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [name, setName] = useState('');
   const [environmentId, setEnvironmentId] = useState('');
@@ -24,7 +32,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
   const [selectedModules, setSelectedModules] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [metadata, setMetadata] = useState<any>({ totalPages: 1 });
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(getToday());
   const [endDate, setEndDate] = useState('');
   const [qaMembers, setQaMembers] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<Record<string, string>>({});
@@ -116,6 +124,15 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const today = getToday();
+    if (startDate < today) {
+      alert('Start date cannot be earlier than today');
+      return;
+    }
+    if (endDate && endDate < startDate) {
+      alert('Target end date cannot be earlier than the start date');
+      return;
+    }
     if (selectedModules.size === 0) {
       alert('Please select at least one module');
       return;
@@ -207,6 +224,8 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
               <label className="block text-sm font-medium text-indigo-200 mb-2">Start Date</label>
               <input 
                 type="date" 
+                required
+                min={getToday()}
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
@@ -217,6 +236,7 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
               <label className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
               <input 
                 type="date" 
+                min={startDate || getToday()}
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
