@@ -32,7 +32,7 @@ export default function LoginPage() {
         throw new Error(json.message || 'Login failed');
       }
 
-      document.cookie = `coreqa_token=${json.data.access_token}; path=/; max-age=86400; secure; samesite=strict`;
+      document.cookie = `coreqa_token=${json.data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=strict`;
       localStorage.setItem('auth', JSON.stringify(json.data));
       router.push('/dashboard');
     } catch (err: unknown) {

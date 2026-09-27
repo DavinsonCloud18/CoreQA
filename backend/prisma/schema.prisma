@@ -32,6 +32,7 @@ model User {
   createdTestcases MasterTestcase[]       @relation("TestcaseCreator")
   updatedTestcases MasterTestcase[]       @relation("TestcaseUpdater")
   notifications    TestcaseNotification[]
+  authSessions     AuthSession[]
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
   isDeleted        Boolean                @default(false)
@@ -39,6 +40,21 @@ model User {
 
   @@index([roleId])
   @@map("users")
+}
+
+model AuthSession {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash  String
+  expiresAt         DateTime
+  lastActivityAt    DateTime @default(now())
+  revokedAt         DateTime?
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_sessions")
 }
 
 model Environment {
