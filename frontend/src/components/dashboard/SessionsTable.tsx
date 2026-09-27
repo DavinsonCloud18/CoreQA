@@ -178,7 +178,7 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50">
-        <table className="w-full text-left border-collapse">
+        <table className="w-max min-w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-800 bg-slate-800/50">
               <th className="py-4 px-6 text-indigo-200 font-semibold w-16">No</th>
@@ -186,8 +186,8 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
               <SortHeader label="Environment" sortKey="environment" />
               <SortHeader label="Timeline" sortKey="timeline" />
               <SortHeader label="Status" sortKey="status" />
-              <SortHeader label="% Executed" sortKey="executed" />
-              <SortHeader label="% Passed" sortKey="passed" />
+              <SortHeader label="Executed" sortKey="executed" />
+              <SortHeader label="Passed" sortKey="passed" />
             </tr>
           </thead>
           <tbody>
@@ -212,7 +212,7 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
+                    <span className={`whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
                       session.status === 'Finished' || session.status === 'Done' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                       session.status === 'On Progress' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                       'bg-slate-500/20 text-slate-400 border border-slate-500/30'
