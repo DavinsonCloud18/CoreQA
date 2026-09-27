@@ -81,9 +81,12 @@ npm run dev
 Buka *browser* pilihan Anda dan kunjungi halaman Login Dasbor di:
 👉 **http://localhost:3000/login**
 
-Gunakan akun *default* hasil dari *seeding script*:
-- **Email:** `qa1@coreqa.com`
-- **Password:** `password123`
+Gunakan akun *default* hasil dari *seeding script* (Password untuk semua akun: `CoreQA_2026!Sec`):
+- **Super Admin:** `admin@coreqa.com`
+- **QA Leader:** `lead@coreqa.com`
+- **QA Member 1:** `qa1@coreqa.com`
+- **QA Member 2:** `qa2@coreqa.com`
+- **QA Member 3:** `qa3@coreqa.com`
 
 ---
 *Dikembangkan untuk Tugas STSI4440 - Capstone Project*

@@ -6,9 +6,18 @@ export function LogoutButton() {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      if (auth.access_token) await fetch(`${baseUrl}/auth/signout`, {
+        method: 'POST', headers: { Authorization: `Bearer ${auth.access_token}` },
+      });
+    } catch { /* Local cleanup still signs the user out if the API is unreachable. */ }
+    localStorage.removeItem('auth');
+    localStorage.removeItem('coreqa_last_activity');
     document.cookie = 'coreqa_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    router.push('/login');
+    router.replace('/login');
   };
 
   return (
