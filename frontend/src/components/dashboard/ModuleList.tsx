@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { ViewMode, ViewToggle } from './ViewToggle';
 
 export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: string }) {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -12,6 +13,17 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
     currentOwner: null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [view, setView] = useState<ViewMode>('list');
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredModules = useMemo(() => modules.filter((module: any) => {
+    const searchMatch = `${module.name || ''} ${module.code || ''} ${module.description || ''}`.toLowerCase().includes(query.trim().toLowerCase());
+    const status = (module.statusBreakdown?.['FAILED'] || 0) > 0 ? 'failed'
+      : (module.statusBreakdown?.['BLOCKED'] || 0) > 0 ? 'blocked'
+      : (module.testcaseCount || 0) > 0 && (module.statusBreakdown?.['TO DO'] || 0) + (module.statusBreakdown?.['UNTESTED'] || 0) === 0 ? 'done' : 'todo';
+    return searchMatch && (statusFilter === 'all' || status === statusFilter);
+  }), [modules, query, statusFilter]);
 
   useEffect(() => {
     const authData = localStorage.getItem('auth');
@@ -87,8 +99,17 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-        {modules.map((m: any) => {
+      <div className="mb-4 flex flex-col sm:flex-row gap-3">
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari modul berdasarkan nama, kode, atau deskripsi..." aria-label="Cari modul"
+          className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter status modul"
+          className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white">
+          <option value="all">Semua status</option><option value="todo">Belum selesai</option><option value="done">Selesai</option><option value="failed">Ada gagal</option><option value="blocked">Terblokir</option>
+        </select>
+        <ViewToggle value={view} onChange={setView} />
+      </div>
+      <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6' : 'flex flex-col gap-3'}>
+        {filteredModules.length === 0 ? <div className="col-span-full rounded-xl border border-slate-700 bg-slate-950/40 py-10 text-center text-sm text-slate-400">Tidak ada modul yang cocok dengan pencarian atau filter.</div> : filteredModules.map((m: any) => {
           const passedCount = m.statusBreakdown?.['PASSED'] || 0;
           const notesCount = m.statusBreakdown?.['PASSED WITH NOTES'] || 0;
           const failedCount = m.statusBreakdown?.['FAILED'] || 0;
@@ -106,12 +127,20 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
           const passedPct = effectiveTotal > 0 ? Math.round((totalPassed / effectiveTotal) * 100) : 0;
           
           const isDone = (todoCount + untestedCount) === 0 && failedCount === 0 && blockedCount === 0 && effectiveTotal > 0;
+
+          if (view === 'list') return (
+            <Link href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`} key={m.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 hover:border-indigo-400 sm:gap-4 sm:px-4">
+              <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h3 className="truncate text-sm font-semibold text-white">{m.name}</h3><span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-indigo-300">{m.code || 'MOD'}</span></div><p className="mt-1 truncate text-xs text-slate-400">{m.testcaseCount || 0} test cases{m.isClaimed ? ` · Claimed by ${m.claimedBy}` : ' · Unclaimed'}</p></div>
+              <div className="flex shrink-0 items-center gap-2 whitespace-nowrap text-[11px] sm:gap-4 sm:text-xs"><span className="whitespace-nowrap text-indigo-300">{completionPct}% executed</span><span className="whitespace-nowrap text-emerald-400">{passedPct}% passed</span></div>
+              {(!m.isClaimed || m.claimedById !== currentUser?.id) ? <div className="flex shrink-0 justify-end"><button onClick={(e) => handleClaimClick(e, m)} className="shrink-0 whitespace-nowrap rounded-lg bg-indigo-600 px-2 py-2 text-[11px] font-semibold text-white hover:bg-indigo-500 sm:px-3 sm:text-xs">{m.isClaimed ? 'Take over' : 'Claim'}</button></div> : <span className="shrink-0 whitespace-nowrap text-right text-xs font-semibold text-emerald-400">Execute →</span>}
+            </Link>
+          );
           
           return (
             <Link 
               href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`}
               key={m.id}
-              className="group p-5 rounded-3xl bg-slate-900 border border-slate-700 hover:border-indigo-400 transition-colors relative flex flex-col justify-between"
+              className={`group p-5 rounded-2xl bg-slate-900 border border-slate-700 hover:border-indigo-400 transition-colors relative ${view === 'grid' ? 'flex flex-col justify-between' : 'flex flex-col md:flex-row md:items-center gap-5'}`}
             >
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
@@ -187,7 +216,7 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
 
                   {/* Action Button */}
                   {(!m.isClaimed || (m.isClaimed && m.claimedById !== currentUser?.id)) ? (
-                     <button 
+                    <button 
                        onClick={(e) => handleClaimClick(e, m)}
                        className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-colors z-20 relative"
                      >
