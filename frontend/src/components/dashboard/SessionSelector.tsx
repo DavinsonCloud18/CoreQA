@@ -14,7 +14,8 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
   const pathname = usePathname();
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + '/sessions' || 'http://localhost:4000/sessions')
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    fetch(`${apiUrl}/sessions`)
       .then(res => res.json())
       .then(json => setSessions(json.data || []))
       .catch(err => console.error(err));
