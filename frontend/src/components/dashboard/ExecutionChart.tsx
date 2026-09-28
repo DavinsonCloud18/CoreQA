@@ -37,7 +37,7 @@ export function ExecutionChart({ summary }: { summary: Record<string, number> })
         <PieChart>
           <Pie
             data={data}
-            cx="35%"
+            cx="45%"
             cy="50%"
             innerRadius={55}
             outerRadius={80}

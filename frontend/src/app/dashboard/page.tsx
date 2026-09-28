@@ -139,8 +139,8 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                   
                   
                   <div className="w-full flex justify-between items-start mb-6 relative z-10">
-                    <div>
-                      <h2 className="text-xl font-bold text-white mb-2">{session.name}</h2>
+                    <div className="container">
+                      <h2 className="text-xl font-bold text-white mb-2 truncate text-nowrap">{session.name}</h2>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                           {session.status}
