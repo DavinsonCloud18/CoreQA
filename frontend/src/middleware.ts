@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (token && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard/sessions/123e4567-e89b-12d3-a456-426614174000', request.url));
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
