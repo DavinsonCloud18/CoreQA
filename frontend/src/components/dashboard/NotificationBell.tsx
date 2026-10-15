@@ -51,41 +51,44 @@ export function NotificationBell() {
   };
 
   return (
-    <div className="relative z-[100]">
+    <div className="relative z-[100]" data-testid="notification-bell">
       <button 
+        id="notification-bell-btn"
+        data-testid="notification-bell-btn"
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 rounded-xl bg-slate-900 hover:bg-white/20 border border-slate-800 transition-colors shadow-sm"
       >
         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center border border-slate-900 shadow-md ">
+          <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 w-5 h-5 bg-rose-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center border border-slate-900 shadow-md " data-testid="notification-unread-badge">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-800 rounded-2xl shadow-sm overflow-hidden z-[100]">
+        <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-800 rounded-2xl shadow-sm overflow-hidden z-[100]" data-testid="notification-dropdown">
           <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/80 ">
-            <h3 className="font-bold text-white">Notifications</h3>
+            <h3 className="font-bold text-white" data-testid="notification-dropdown-title">Notifications</h3>
             {unreadCount > 0 && (
-              <span className="text-xs text-indigo-300 font-medium">{unreadCount} unread</span>
+              <span className="text-xs text-indigo-300 font-medium" data-testid="notification-unread-count">{unreadCount} unread</span>
             )}
           </div>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto" data-testid="notification-list">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-white/50 text-sm">No notifications yet.</div>
+              <div className="p-8 text-center text-white/50 text-sm" data-testid="notification-empty">No notifications yet.</div>
             ) : (
               notifications.map((notif: any) => (
                 <div 
                   key={notif.id} 
+                  data-testid={`notification-item-${notif.id}`}
                   onClick={() => handleNotificationClick(notif)}
                   className={`p-4 border-b border-slate-800 cursor-pointer hover:bg-white/5 transition-colors ${!notif.isRead ? 'bg-indigo-500/10' : ''}`}
                 >
-                  <p className={`text-sm ${!notif.isRead ? 'text-white font-medium' : 'text-white/70'}`}>
+                  <p className={`text-sm ${!notif.isRead ? 'text-white font-medium' : 'text-white/70'}`} data-testid="notification-message">
                     {notif.message}
                   </p>
-                  <p className="text-[10px] text-white/40 mt-1">
+                  <p className="text-[10px] text-white/40 mt-1" data-testid="notification-timestamp">
                     {new Date(notif.createdAt).toLocaleString()}
                   </p>
                 </div>

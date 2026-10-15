@@ -175,22 +175,24 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 " onClick={onClose}></div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" data-testid="create-session-modal">
+      <div className="absolute inset-0 bg-slate-900/60 " onClick={onClose} data-testid="create-session-backdrop"></div>
       
       <div className="relative z-10 w-full max-w-2xl bg-slate-900/90 border border-slate-700 rounded-[2rem] p-8 shadow-sm  flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center mb-6 shrink-0">
-          <h2 className="text-2xl font-bold text-white">Create New Session</h2>
-          <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+          <h2 className="text-2xl font-bold text-white" data-testid="create-session-title">Create New Session</h2>
+          <button id="create-session-close-btn" data-testid="create-session-close-btn" onClick={onClose} className="text-white/50 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 overflow-hidden flex-1">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6 overflow-hidden flex-1" id="create-session-form" data-testid="create-session-form">
           <div className="grid grid-cols-2 gap-4 shrink-0">
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-indigo-200 mb-2">Session Name</label>
+              <label htmlFor="create-session-name-input" className="block text-sm font-medium text-indigo-200 mb-2">Session Name</label>
               <input 
+                id="create-session-name-input"
+                data-testid="create-session-name-input"
                 type="text" 
                 required
                 value={name}
@@ -202,10 +204,12 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
 
             <div className="col-span-2 sm:col-span-1">
               <label className="block text-sm font-medium text-indigo-200 mb-2">Environment</label>
-              <div className="flex flex-wrap gap-2 mt-1">
+              <div className="flex flex-wrap gap-2 mt-1" data-testid="create-session-env-list">
                 {environments.map(env => (
                   <button
                     key={env.id}
+                    id={`create-session-env-${env.id}`}
+                    data-testid={`create-session-env-${env.id}`}
                     type="button"
                     onClick={() => setEnvironmentId(String(env.id))}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
@@ -221,8 +225,10 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
             </div>
             
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-indigo-200 mb-2">Start Date</label>
+              <label htmlFor="create-session-start-date" className="block text-sm font-medium text-indigo-200 mb-2">Start Date</label>
               <input 
+                id="create-session-start-date"
+                data-testid="create-session-start-date-input"
                 type="date" 
                 required
                 min={getToday()}
@@ -233,8 +239,10 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
             </div>
 
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
+              <label htmlFor="create-session-end-date" className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
               <input 
+                id="create-session-end-date"
+                data-testid="create-session-end-date-input"
                 type="date" 
                 min={startDate || getToday()}
                 value={endDate}
@@ -244,13 +252,13 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
             </div>
           </div>
 
-          <div className="flex flex-col overflow-hidden flex-1 border border-slate-800 rounded-xl p-4 bg-white/5">
+          <div className="flex flex-col overflow-hidden flex-1 border border-slate-800 rounded-xl p-4 bg-white/5" data-testid="create-session-modules-section">
              <div className="flex flex-col mb-4 shrink-0 gap-3">
                <div className="flex justify-between items-end">
                  <div>
                    <label className="flex items-center gap-2 text-sm font-bold text-indigo-200">
                      Modules to Include
-                     <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs font-semibold border border-indigo-500/20">
+                     <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs font-semibold border border-indigo-500/20" data-testid="create-session-selected-count">
                        {selectedModules.size} Selected
                      </span>
                    </label>
@@ -260,6 +268,8 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                  </div>
                  <div className="relative">
                    <input 
+                     id="create-session-search-module-input"
+                     data-testid="create-session-search-module-input"
                      type="text" 
                      value={search}
                      onChange={(e) => {
@@ -276,37 +286,41 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
              
              <div className="flex items-center gap-2 mb-3 shrink-0">
                 <input 
+                  id="create-session-select-all-checkbox"
+                  data-testid="create-session-select-all-checkbox"
                   type="checkbox" 
                   checked={allSelected} 
                   onChange={handleSelectAll}
                   className="w-4 h-4 rounded border-slate-700 bg-black/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
                 />
-                <span className="text-sm text-white">Select All on Page</span>
+                <label htmlFor="create-session-select-all-checkbox" className="text-sm text-white cursor-pointer">Select All on Page</label>
              </div>
 
-              <div className="overflow-y-auto pr-2 space-y-3 flex-1 custom-scrollbar">
+              <div className="overflow-y-auto pr-2 space-y-3 flex-1 custom-scrollbar" data-testid="create-session-module-list">
                 {modules.map(m => (
-                  <div key={m.id} className={`flex flex-col rounded-lg border  ${selectedModules.has(m.id) ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 bg-slate-800 hover:bg-slate-800'}`}>
+                  <div key={m.id} className={`flex flex-col rounded-lg border  ${selectedModules.has(m.id) ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 bg-slate-800 hover:bg-slate-800'}`} data-testid={`create-session-module-item-${m.id}`}>
                     <label className="flex items-center justify-between p-3 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <input 
-                          type="checkbox"
+                          data-testid={`create-session-module-checkbox-${m.id}`}
+                          type="checkbox" 
                           checked={selectedModules.has(m.id)}
                           onChange={() => toggleModule(m.id)}
                           className="w-4 h-4 rounded border-slate-700 bg-black/50 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900" 
                         />
-                        <span className="text-white font-medium">{m.name}</span>
+                        <span className="text-white font-medium" data-testid="module-name">{m.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {selectedModules.has(m.id) && (
-                          <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">Included</span>
+                          <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded" data-testid="module-included-badge">Included</span>
                         )}
-                        <span className="text-xs font-semibold text-indigo-300 bg-indigo-500/20 px-2 py-1 rounded-md">{m.testcaseCount} TCs</span>
+                        <span className="text-xs font-semibold text-indigo-300 bg-indigo-500/20 px-2 py-1 rounded-md" data-testid="module-tc-count">{m.testcaseCount} TCs</span>
                       </div>
                     </label>
                     {selectedModules.has(m.id) && (
                       <div className="pl-10 pr-3 pb-3">
                         <select
+                          data-testid={`create-session-module-assign-${m.id}`}
                           value={assignments[m.id] || ''}
                           onChange={(e) => setAssignments({ ...assignments, [m.id]: e.target.value })}
                           className="w-full bg-slate-800 border border-indigo-500/30 rounded-lg px-3 py-2 text-sm text-indigo-200 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -321,13 +335,15 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                   </div>
                 ))}
                 {modules.length === 0 && (
-                  <div className="text-center py-8 text-white/50">No modules found</div>
+                  <div className="text-center py-8 text-white/50" data-testid="create-session-empty-modules">No modules found</div>
                 )}
              </div>
 
              {metadata.totalPages > 1 && (
-               <div className="flex justify-between items-center bg-slate-800 p-2 rounded-lg shrink-0 mt-3 border border-slate-800">
+               <div className="flex justify-between items-center bg-slate-800 p-2 rounded-lg shrink-0 mt-3 border border-slate-800" data-testid="create-session-pagination">
                   <button 
+                    id="create-session-page-prev"
+                    data-testid="create-session-page-prev"
                     type="button"
                     disabled={page === 1}
                     onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -335,8 +351,10 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                   </button>
-                  <span className="text-white/70 text-xs font-medium tracking-wide">Page {page} of {metadata.totalPages}</span>
+                  <span className="text-white/70 text-xs font-medium tracking-wide" data-testid="create-session-page-info">Page {page} of {metadata.totalPages}</span>
                   <button 
+                    id="create-session-page-next"
+                    data-testid="create-session-page-next"
                     type="button"
                     disabled={page >= metadata.totalPages}
                     onClick={() => setPage(p => Math.min(metadata.totalPages, p + 1))}
@@ -350,6 +368,8 @@ export function CreateSessionModal({ isOpen, onClose }: { isOpen: boolean; onClo
 
           <div className="pt-2 shrink-0">
             <button 
+              id="create-session-submit-btn"
+              data-testid="create-session-submit-btn"
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm  hover:   disabled:opacity-50 disabled:hover:scale-100"

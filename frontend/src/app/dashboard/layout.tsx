@@ -1,5 +1,10 @@
 import AuthSessionManager from '@/components/dashboard/AuthSessionManager';
 
 export default function DashboardLayout({ children }: LayoutProps<'/dashboard'>) {
-  return <><AuthSessionManager />{children}</>;
+  return (
+    <div id="dashboard-layout" data-testid="dashboard-layout" className="contents">
+      <AuthSessionManager />
+      {children}
+    </div>
+  );
 }

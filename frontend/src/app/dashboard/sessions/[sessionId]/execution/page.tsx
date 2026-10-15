@@ -20,19 +20,19 @@ export default async function ExecutionMenuPage({ params }: { params: Promise<{ 
   const status = session?.status;
   
   return (
-    <div className="min-h-screen relative flex bg-slate-950">
+    <div className="min-h-screen relative flex bg-slate-950" id="session-execution-page" data-testid="session-execution-page">
       
 
       <Sidebar />
 
-      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
+      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto" data-testid="session-execution-content">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm" data-testid="session-execution-header">
             <div className="flex-1">
               <div className="flex items-center gap-4">
                 <BackButton />
                 <div>
-                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">
+                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md" data-testid="session-execution-header-title">
                     {session ? session.name : 'Execution Menu'}
                   </h1>
                   <div className="text-indigo-200 font-medium text-sm mt-1.5 flex items-center gap-2">
@@ -57,7 +57,7 @@ export default async function ExecutionMenuPage({ params }: { params: Promise<{ 
             </div>
           </header>
 
-          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden" data-testid="session-execution-table-section">
             <ExecutionTable sessionId={resolvedParams.sessionId} sessionStatus={status} />
           </section>
         </div>

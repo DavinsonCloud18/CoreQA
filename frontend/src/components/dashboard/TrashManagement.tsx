@@ -182,13 +182,15 @@ export function TrashManagement() {
 
   return (
     <>
-    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative">
+    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative" data-testid="trash-management">
       
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-4 relative z-10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-4 relative z-10" data-testid="trash-tabs">
         <div className="flex gap-4">
           {['sessions', 'modules', 'testcases', 'users'].map((tab) => (
             <button
               key={tab}
+              id={`trash-tab-${tab}`}
+              data-testid={`trash-tab-${tab}`}
               onClick={() => setActiveTab(tab as any)}
               className={`px-4 py-2 font-bold rounded-lg whitespace-nowrap ${activeTab === tab ? 'bg-indigo-600 text-white' : 'text-white/60 hover:text-white'}`}
             >
@@ -199,18 +201,20 @@ export function TrashManagement() {
       </div>
 
       <div className="relative z-10 mb-6">
-        <h2 className="text-3xl font-black text-white mb-2">
+        <h2 className="text-3xl font-black text-white mb-2" data-testid="trash-title">
           {activeTab === 'testcases' ? 'Test Cases' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Trash
         </h2>
         <p className="text-white/60 text-sm">View and restore soft-deleted {activeTab}.</p>
       </div>
 
-      <div className="relative z-10 mb-4 flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-800">
+      <div className="relative z-10 mb-4 flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-800" data-testid="trash-actions-bar">
         <div className="text-sm text-white/70">
-          <span className="font-bold text-white">{selectedIds.length}</span> item(s) selected
+          <span className="font-bold text-white" data-testid="trash-selected-count">{selectedIds.length}</span> item(s) selected
         </div>
         <div className="flex items-center gap-3">
           <button 
+            id="trash-delete-btn"
+            data-testid="trash-delete-btn"
             onClick={() => setIsDeleteModalOpen(true)}
             disabled={selectedIds.length === 0}
             className="px-6 py-2 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-xl font-bold hover:bg-rose-600/30 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -219,6 +223,8 @@ export function TrashManagement() {
             Permanently Delete
           </button>
           <button 
+            id="trash-restore-btn"
+            data-testid="trash-restore-btn"
             onClick={handleRestore}
             disabled={selectedIds.length === 0}
             className="px-6 py-2 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -229,13 +235,15 @@ export function TrashManagement() {
         </div>
       </div>
 
-      <div className="relative z-10 bg-slate-800 border border-slate-800 rounded-2xl overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[600px]">
+      <div className="relative z-10 bg-slate-800 border border-slate-800 rounded-2xl overflow-x-auto" data-testid="trash-table-container">
+        <table className="w-full text-left border-collapse min-w-[600px]" data-testid="trash-table">
           <thead>
             <tr className="border-b border-slate-800 bg-white/5">
               <th className="py-4 px-6 w-16">
                 <input 
                   type="checkbox" 
+                  id="trash-select-all-checkbox"
+                  data-testid="trash-select-all-checkbox"
                   className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500/50"
                   checked={data.length > 0 && selectedIds.length === data.length}
                   onChange={handleSelectAll}
@@ -247,19 +255,21 @@ export function TrashManagement() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr>
+              <tr data-testid="trash-loading-row">
                 <td colSpan={5} className="py-12 text-center text-white/50">Loading...</td>
               </tr>
             ) : data.length === 0 ? (
-              <tr>
+              <tr data-testid="trash-empty-row">
                 <td colSpan={5} className="py-12 text-center text-white/50">No deleted {activeTab} found.</td>
               </tr>
             ) : (
               data.map((item) => (
-                <tr key={item.id} className="border-b border-slate-800 hover:bg-white/5">
+                <tr key={item.id} className="border-b border-slate-800 hover:bg-white/5" data-testid={`trash-row-${item.id}`}>
                   <td className="py-4 px-6">
                     <input 
                       type="checkbox" 
+                      id={`trash-checkbox-${item.id}`}
+                      data-testid={`trash-checkbox-${item.id}`}
                       className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500/50"
                       checked={selectedIds.includes(item.id)}
                       onChange={() => handleSelect(item.id)}
@@ -277,7 +287,7 @@ export function TrashManagement() {
       </div>
     </div>
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200" data-testid="trash-delete-modal">
           <div className="bg-slate-900 border border-slate-700/50 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl shadow-rose-900/20 animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-rose-500/20">
               <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,6 +300,8 @@ export function TrashManagement() {
             </p>
             <div className="flex gap-3">
               <button 
+                id="trash-delete-cancel-btn"
+                data-testid="trash-delete-cancel-btn"
                 onClick={() => setIsDeleteModalOpen(false)}
                 disabled={isDeleting}
                 className="flex-1 px-4 py-3 rounded-xl font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors disabled:opacity-50"
@@ -297,6 +309,8 @@ export function TrashManagement() {
                 Cancel
               </button>
               <button 
+                id="trash-delete-confirm-btn"
+                data-testid="trash-delete-confirm-btn"
                 onClick={executePermanentDelete}
                 disabled={isDeleting}
                 className="flex-1 px-4 py-3 rounded-xl font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
