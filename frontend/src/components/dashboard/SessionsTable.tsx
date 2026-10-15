@@ -43,6 +43,7 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
     const index = getSortIndex(sortKey);
     return (
       <th 
+        data-testid={`sessions-th-${sortKey}`}
         className="py-4 px-6 text-indigo-200 font-semibold cursor-pointer hover:bg-slate-700/50 transition-colors select-none group"
         onClick={() => handleSort(sortKey)}
       >
@@ -149,11 +150,13 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
   };
 
   return (
-    <div className="w-full">
+    <div data-testid="sessions-table-container" className="w-full">
       <div className="mb-6 flex justify-between items-center">
         <div className="relative w-72">
           <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           <input 
+            id="sessions-search-input"
+            data-testid="sessions-search-input"
             type="text"
             placeholder="Search sessions..."
             value={search}
@@ -164,6 +167,8 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
         <div className="flex items-center gap-4">
           {sorts.length > 0 && (
             <button 
+              id="sessions-disable-sort-btn"
+              data-testid="sessions-disable-sort-btn"
               onClick={() => setSorts([])}
               className="text-xs font-semibold px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 rounded-lg transition-colors flex items-center gap-1.5"
             >
@@ -171,14 +176,14 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
               Disable Sorting
             </button>
           )}
-          <div className="text-sm text-indigo-200">
+          <div data-testid="sessions-total-count" className="text-sm text-indigo-200">
             Total: <span className="font-bold text-white">{filtered.length}</span> sessions
           </div>
         </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50">
-        <table className="w-max min-w-full text-left border-collapse">
+        <table data-testid="sessions-table" className="w-max min-w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-800 bg-slate-800/50">
               <th className="py-4 px-6 text-indigo-200 font-semibold w-16">No</th>
@@ -197,21 +202,23 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
               return (
                 <tr 
                   key={session.id} 
+                  data-testid={`session-row-${session.id}`}
+                  data-session-id={session.id}
                   onClick={() => handleRowClick(session.id)}
                   className="border-b border-slate-800/50 hover:bg-white/5 transition-colors cursor-pointer group"
                 >
                   <td className="py-4 px-6 font-medium text-white/50">{absoluteIndex}</td>
-                  <td className="py-4 px-6 font-bold text-white group-hover:text-indigo-400 transition-colors">{session.name}</td>
-                  <td className="py-4 px-6">
+                  <td data-testid={`session-name-${session.id}`} className="py-4 px-6 font-bold text-white group-hover:text-indigo-400 transition-colors">{session.name}</td>
+                  <td data-testid={`session-env-${session.id}`} className="py-4 px-6">
                     <span className="bg-slate-950 px-2 py-1 rounded text-sm text-indigo-200 border border-slate-800">{session.environment.name}</span>
                   </td>
-                  <td className="py-4 px-6">
+                  <td data-testid={`session-timeline-${session.id}`} className="py-4 px-6">
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-white/80">{new Date(session.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       <span className="text-xs text-white/50">to {session.endDate ? new Date(session.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Ongoing'}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-6">
+                  <td data-testid={`session-status-${session.id}`} className="py-4 px-6">
                     <span className={`whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
                       session.status === 'Finished' || session.status === 'Done' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                       session.status === 'On Progress' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
@@ -220,12 +227,12 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
                       {session.status}
                     </span>
                   </td>
-                  <td className="py-4 px-6">
+                  <td data-testid={`session-executed-${session.id}`} className="py-4 px-6">
                     <span className="text-indigo-200/90 text-sm font-bold bg-indigo-500/20 px-2.5 py-1 rounded border border-indigo-400/20 inline-block text-center min-w-[3rem]">
                       {session.completionPct}%
                     </span>
                   </td>
-                  <td className="py-4 px-6">
+                  <td data-testid={`session-passed-${session.id}`} className="py-4 px-6">
                     <span className="text-emerald-200/90 text-sm font-bold bg-emerald-500/20 px-2.5 py-1 rounded border border-emerald-400/20 inline-block text-center min-w-[3rem]">
                       {session.passRate}%
                     </span>
@@ -235,7 +242,7 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
             })}
             {paginated.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-white/50">
+                <td data-testid="sessions-empty-state" colSpan={7} className="py-12 text-center text-white/50">
                   {search ? 'No sessions match your search.' : 'No sessions found. Create one from the sidebar.'}
                 </td>
               </tr>
@@ -246,12 +253,14 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="mt-6 flex justify-between items-center">
+        <div data-testid="sessions-pagination" className="mt-6 flex justify-between items-center">
           <div className="text-sm text-white/50">
             Showing <span className="text-white font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-white font-medium">{Math.min(currentPage * itemsPerPage, sorted.length)}</span> of <span className="text-white font-medium">{sorted.length}</span> entries
           </div>
           <div className="flex gap-2">
             <button 
+              id="sessions-prev-page-btn"
+              data-testid="sessions-prev-page-btn"
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="p-2 rounded-lg bg-slate-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors border border-slate-700"
@@ -262,6 +271,7 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
               {Array.from({ length: totalPages }).map((_, i) => (
                 <button
                   key={i}
+                  data-testid={`sessions-page-${i + 1}-btn`}
                   onClick={() => setCurrentPage(i + 1)}
                   className={`w-10 h-10 rounded-lg text-sm font-bold transition-colors ${currentPage === i + 1 ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-800 text-white/70 hover:bg-slate-700 hover:text-white border border-slate-700'}`}
                 >
@@ -270,6 +280,8 @@ export function SessionsTable({ initialSessions }: { initialSessions: any[] }) {
               ))}
             </div>
             <button 
+              id="sessions-next-page-btn"
+              data-testid="sessions-next-page-btn"
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="p-2 rounded-lg bg-slate-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors border border-slate-700"

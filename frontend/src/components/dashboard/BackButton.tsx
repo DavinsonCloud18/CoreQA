@@ -7,6 +7,8 @@ export function BackButton() {
 
   return (
     <button 
+      id="back-btn"
+      data-testid="back-btn"
       onClick={() => router.back()} 
       className="w-12 h-12 bg-white/5 hover:bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center transition-colors shrink-0"
       title="Go Back"

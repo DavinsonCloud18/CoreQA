@@ -21,6 +21,8 @@ export function EditSessionButton({ session }: { session: any }) {
   return (
     <>
       <button 
+        id="edit-session-btn"
+        data-testid="edit-session-btn"
         onClick={() => setIsOpen(true)}
         className="flex items-center justify-center gap-2 px-4 h-10 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-bold rounded-xl transition-colors border border-indigo-500/30 shadow-sm"
       >

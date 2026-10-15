@@ -205,19 +205,20 @@ export function ImportExportTC() {
   };
 
   return (
-    <section className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+    <section data-testid="import-export-container" className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
       
+ 
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-4 relative z-10">
         <div className="flex gap-4">
-          <button onClick={() => setActiveTab('import')} className={`px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === 'import' ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white'}`}>Import</button>
-          <button onClick={() => setActiveTab('export')} className={`px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === 'export' ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white'}`}>Export</button>
+          <button id="import-tab-btn" data-testid="import-tab-btn" onClick={() => setActiveTab('import')} className={`px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === 'import' ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white'}`}>Import</button>
+          <button id="export-tab-btn" data-testid="export-tab-btn" onClick={() => setActiveTab('export')} className={`px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === 'export' ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white'}`}>Export</button>
         </div>
       </div>
 
       <div className="relative z-10">
         {activeTab === 'import' && (
-          <div className="w-full mx-auto">
+          <div data-testid="import-section" className="w-full mx-auto">
             <h2 className="text-3xl font-black text-white mb-6">Import Test Case</h2>
             
             <div className="mb-8">
@@ -273,16 +274,16 @@ export function ImportExportTC() {
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               </div>
               
-              <label className="cursor-pointer bg-indigo-600 hover:from-cyan-400 hover:to-blue-400 text-white font-bold py-3 px-8 rounded-xl shadow-sm  mb-4">
+              <label data-testid="import-file-label" className="cursor-pointer bg-indigo-600 hover:from-cyan-400 hover:to-blue-400 text-white font-bold py-3 px-8 rounded-xl shadow-sm  mb-4">
                 {file ? file.name : 'Pilih File'}
-                <input type="file" className="hidden" accept=".xlsx" onChange={handleFileChange} />
+                <input id="import-file-input" data-testid="import-file-input" type="file" className="hidden" accept=".xlsx" onChange={handleFileChange} />
               </label>
 
               <p className="text-white/60 font-medium mb-1">xlsx only</p>
               <p className="text-white/40 text-sm mb-4">Ukuran file maksimal 10 MB</p>
               <p className="text-indigo-200/80 text-sm italic font-medium mb-4">Gunakan format yang telah disediakan</p>
               
-              <a href="/Template Testcase.xlsx" download className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors">
+              <a id="import-download-template-link" data-testid="import-download-template-link" href="/Template Testcase.xlsx" download className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors">
                 Unduh Template
               </a>
             </div>
@@ -294,6 +295,8 @@ export function ImportExportTC() {
 
             <div className="flex justify-end">
               <button 
+                id="import-submit-btn"
+                data-testid="import-submit-btn"
                 onClick={handleImport}
                 disabled={isUploading || !file}
                 className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-bold py-3 px-8 rounded-xl shadow-sm "
@@ -305,12 +308,14 @@ export function ImportExportTC() {
         )}
 
         {activeTab === 'export' && (
-          <div className="w-full mx-auto">
+          <div data-testid="export-section" className="w-full mx-auto">
             <h2 className="text-3xl font-black text-white mb-6">Export Test Case</h2>
             <p className="text-white/60 mb-8">Pilih modul yang ingin di-export. Setiap modul akan dibuatkan sheet terpisah di dalam file Excel.</p>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
                 <input 
+                  id="export-search-module-input"
+                  data-testid="export-search-module-input"
                   type="text" 
                   placeholder="Cari modul..."
                   value={searchQuery}
@@ -320,6 +325,8 @@ export function ImportExportTC() {
               </div>
               <div className="flex-1 sm:max-w-xs relative">
                 <button
+                  id="export-session-dropdown-btn"
+                  data-testid="export-session-dropdown-btn"
                   type="button"
                   onClick={() => setIsSessionDropdownOpen(!isSessionDropdownOpen)}
                   className="w-full text-left bg-slate-800 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-between"
@@ -333,9 +340,11 @@ export function ImportExportTC() {
                 </button>
                 
                 {isSessionDropdownOpen && (
-                  <div className="absolute z-50 w-full mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                  <div data-testid="export-session-dropdown-menu" className="absolute z-50 w-full mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-sm overflow-hidden">
                     <div className="p-2 border-b border-slate-800 bg-slate-800">
                       <input 
+                        id="export-session-search-input"
+                        data-testid="export-session-search-input"
                         type="text"
                         placeholder="Cari session..."
                         value={sessionSearchQuery}
@@ -346,6 +355,7 @@ export function ImportExportTC() {
                     </div>
                     <ul className="max-h-60 overflow-y-auto">
                       <li 
+                        data-testid="export-session-option-all"
                         className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-indigo-500/20 ${!selectedSessionId ? 'bg-indigo-500/10 text-indigo-300' : 'text-white'}`}
                         onClick={() => { setSelectedSessionId(''); setIsSessionDropdownOpen(false); setSessionSearchQuery(''); }}
                       >
@@ -356,6 +366,7 @@ export function ImportExportTC() {
                         .map(s => (
                         <li 
                           key={s.id}
+                          data-testid={`export-session-option-${s.id}`}
                           className={`px-4 py-2.5 text-sm cursor-pointer hover:bg-indigo-500/20 truncate ${selectedSessionId === s.id ? 'bg-indigo-500/10 text-indigo-300 font-bold' : 'text-white'}`}
                           onClick={() => { setSelectedSessionId(s.id); setIsSessionDropdownOpen(false); setSessionSearchQuery(''); }}
                         >
@@ -363,7 +374,7 @@ export function ImportExportTC() {
                         </li>
                       ))}
                       {sessions.filter(s => s.name.toLowerCase().includes(sessionSearchQuery.toLowerCase())).length === 0 && (
-                        <li className="px-4 py-3 text-sm text-white/50 text-center italic">Session tidak ditemukan</li>
+                        <li data-testid="export-session-empty" className="px-4 py-3 text-sm text-white/50 text-center italic">Session tidak ditemukan</li>
                       )}
                     </ul>
                   </div>
@@ -379,6 +390,8 @@ export function ImportExportTC() {
                   .map(mod => (
                   <label key={mod.id} className="flex items-center gap-3 p-4 border border-slate-800 bg-white/5 rounded-xl cursor-pointer hover:bg-slate-900 transition-colors">
                     <input 
+                      id={`export-module-checkbox-${mod.id}`}
+                      data-testid={`export-module-checkbox-${mod.id}`}
                       type="checkbox" 
                       className="w-5 h-5 rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0"
                       checked={selectedModules.includes(mod.id)}
@@ -391,13 +404,15 @@ export function ImportExportTC() {
                   </label>
                 ))}
                 {modules.length === 0 && (
-                  <p className="text-white/40 italic col-span-3 text-center py-4">Belum ada modul yang tersedia.</p>
+                  <p data-testid="export-module-empty" className="text-white/40 italic col-span-3 text-center py-4">Belum ada modul yang tersedia.</p>
                 )}
               </div>
             </div>
 
             <div className="flex justify-end">
               <button 
+                id="export-submit-btn"
+                data-testid="export-submit-btn"
                 onClick={handleExport}
                 disabled={isExporting || selectedModules.length === 0}
                 className="bg-indigo-600 hover:from-purple-400 hover:to-pink-400 disabled:opacity-50 text-white font-bold py-3 px-8 rounded-xl shadow-sm "
@@ -411,7 +426,7 @@ export function ImportExportTC() {
 
       {/* Result Modal */}
       {resultModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4   ">
+        <div data-testid="import-export-result-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4   ">
           <div className="bg-[#0f1117] border border-slate-800 rounded-2xl p-6 w-full max-w-2xl shadow-sm relative overflow-hidden max-h-[90vh] flex flex-col">
             <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${resultModal.type === 'success' ? 'from-emerald-500 to-emerald-400' : 'from-rose-500 to-rose-400'}`}></div>
             
@@ -427,16 +442,17 @@ export function ImportExportTC() {
                 <h3 className="text-xl font-bold text-white">
                   {resultModal.type === 'success' ? 'Berhasil!' : 'Gagal!'}
                 </h3>
-                <p className="text-sm text-white/60 mt-0.5">{resultModal.message}</p>
+                <p data-testid="import-export-result-message" className="text-sm text-white/60 mt-0.5">{resultModal.message}</p>
               </div>
             </div>
 
             {resultModal.errors && resultModal.errors.length > 0 && (
-              <div className="flex-1 overflow-y-auto min-h-0 bg-rose-950/20 border border-rose-900/30 rounded-xl p-4 mb-6">
+              <div data-testid="import-export-result-errors" className="flex-1 overflow-y-auto min-h-0 bg-rose-950/20 border border-rose-900/30 rounded-xl p-4 mb-6">
                 <ul className="space-y-3">
                   {Object.entries(resultModal.errors.reduce((acc, curr) => {
                     if (!acc[curr.message]) acc[curr.message] = [];
                     acc[curr.message].push(curr.row);
+                    return acc;
                     return acc;
                   }, {} as Record<string, number[]>)).map(([msg, rows], i) => (
                     <li key={i} className="text-rose-200 text-sm flex flex-col gap-2 bg-rose-950/40 p-3 rounded-lg border border-rose-900/50">
@@ -458,6 +474,8 @@ export function ImportExportTC() {
 
             <div className="flex justify-end shrink-0 mt-4">
               <button 
+                id="import-export-result-close-btn"
+                data-testid="import-export-result-close-btn"
                 onClick={() => setResultModal({ ...resultModal, isOpen: false })}
                 className="px-6 py-2.5 bg-slate-900 hover:bg-white/20 text-white rounded-xl font-bold  text-sm"
               >

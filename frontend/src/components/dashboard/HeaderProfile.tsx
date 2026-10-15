@@ -17,7 +17,7 @@ export function HeaderProfile() {
 
   if (!currentUser) {
     return (
-      <div className="flex items-center gap-3 pr-2">
+      <div className="flex items-center gap-3 pr-2" data-testid="header-profile-skeleton">
          <div className="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 shadow-sm"></div>
          <div className="hidden sm:flex flex-col gap-1.5">
            <div className="w-20 h-3 bg-slate-800 rounded"></div>
@@ -28,12 +28,12 @@ export function HeaderProfile() {
   }
 
   return (
-    <div className="flex items-center gap-3 pr-2 border-r border-slate-700/50 mr-2">
+    <div className="flex items-center gap-3 pr-2 border-r border-slate-700/50 mr-2" data-testid="header-profile">
        <div className="flex flex-col items-end hidden sm:flex">
-         <span className="text-sm font-semibold text-white leading-tight">{currentUser.name}</span>
-         <span className="text-xs text-indigo-200/70 font-medium">{currentUser.role || currentUser.email}</span>
+         <span className="text-sm font-semibold text-white leading-tight" data-testid="header-profile-name">{currentUser.name}</span>
+         <span className="text-xs text-indigo-200/70 font-medium" data-testid="header-profile-role">{currentUser.role || currentUser.email}</span>
        </div>
-       <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-500/30 shadow-md">
+       <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-500/30 shadow-md" data-testid="header-profile-avatar">
          <span className="text-sm font-bold text-white">{currentUser.name.substring(0,2).toUpperCase()}</span>
        </div>
     </div>

@@ -36,14 +36,14 @@ export default async function SessionsHistoryPage() {
   );
 
   return (
-    <div className="min-h-screen relative flex bg-slate-950">
+    <div className="min-h-screen relative flex bg-slate-950" id="sessions-page" data-testid="sessions-page">
       
       <Sidebar />
-      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
+      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto" data-testid="sessions-content">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm" data-testid="sessions-header">
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">Execution Log</h1>
+              <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md" data-testid="sessions-header-title">Execution Log</h1>
               <p className="text-indigo-200 font-medium text-sm mt-0.5">Manage and view all testing sessions</p>
             </div>
             <div className="flex items-center gap-4">
@@ -53,7 +53,7 @@ export default async function SessionsHistoryPage() {
             </div>
           </header>
 
-          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden" data-testid="sessions-table-section">
             <SessionsTable initialSessions={sessionsWithAnalytics} />
           </section>
         </div>

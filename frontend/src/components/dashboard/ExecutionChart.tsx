@@ -22,7 +22,7 @@ export function ExecutionChart({ summary }: { summary: Record<string, number> })
 
   if (data.length === 0) {
     return (
-      <div className="w-full h-[180px] flex items-center justify-center text-white/50">
+      <div className="w-full h-[180px] flex items-center justify-center text-white/50" data-testid="execution-chart-empty">
         No execution data available.
       </div>
     );
@@ -32,7 +32,7 @@ export function ExecutionChart({ summary }: { summary: Record<string, number> })
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="w-full h-[180px]">
+    <div className="w-full h-[180px]" data-testid="execution-chart">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie

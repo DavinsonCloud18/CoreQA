@@ -212,22 +212,24 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div data-testid="edit-session-modal" className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 " onClick={onClose}></div>
       
       <div className="relative z-10 w-full max-w-2xl bg-slate-900/90 border border-slate-700 rounded-[2rem] p-8 shadow-sm  flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center mb-6 shrink-0">
           <h2 className="text-2xl font-bold text-white">Edit Session</h2>
-          <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+          <button data-testid="edit-session-close-btn" onClick={onClose} className="text-white/50 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 overflow-hidden flex-1">
+        <form data-testid="edit-session-form" onSubmit={handleSubmit} className="flex flex-col gap-6 overflow-hidden flex-1">
           <div className="grid grid-cols-2 gap-4 shrink-0">
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-indigo-200 mb-2">Session Name</label>
+              <label htmlFor="edit-session-name-input" className="block text-sm font-medium text-indigo-200 mb-2">Session Name</label>
               <input 
+                id="edit-session-name-input"
+                data-testid="edit-session-name-input"
                 type="text" 
                 required
                 value={name}
@@ -243,6 +245,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
                 {environments.map(env => (
                   <button
                     key={env.id}
+                    data-testid={`edit-session-env-${env.id}`}
                     type="button"
                     onClick={() => setEnvironmentId(String(env.id))}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
@@ -258,8 +261,10 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
             </div>
             
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-indigo-200 mb-2">Start Date</label>
+              <label htmlFor="edit-session-start-date-input" className="block text-sm font-medium text-indigo-200 mb-2">Start Date</label>
               <input 
+                id="edit-session-start-date-input"
+                data-testid="edit-session-start-date-input"
                 type="date" 
                 required
                 min={getToday()}
@@ -270,8 +275,10 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
             </div>
 
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
+              <label htmlFor="edit-session-end-date-input" className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
               <input 
+                id="edit-session-end-date-input"
+                data-testid="edit-session-end-date-input"
                 type="date" 
                 min={startDate || getToday()}
                 value={endDate}
@@ -297,6 +304,8 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
                  </div>
                  <div className="relative">
                    <input 
+                     id="edit-session-search-module-input"
+                     data-testid="edit-session-search-module-input"
                      type="text" 
                      value={search}
                      onChange={(e) => {
@@ -313,6 +322,8 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
              
              <div className="flex items-center gap-2 mb-3 shrink-0">
                 <input 
+                  id="edit-session-select-all-checkbox"
+                  data-testid="edit-session-select-all-checkbox"
                   type="checkbox" 
                   checked={allSelected} 
                   onChange={handleSelectAll}
@@ -323,10 +334,12 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
 
               <div className="overflow-y-auto pr-2 space-y-3 flex-1 custom-scrollbar">
                 {modules.map(m => (
-                  <div key={m.id} className={`flex flex-col rounded-lg border  ${selectedModules.has(m.id) ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 bg-slate-800 hover:bg-slate-800'}`}>
+                  <div key={m.id} data-testid={`edit-session-module-item-${m.id}`} className={`flex flex-col rounded-lg border  ${selectedModules.has(m.id) ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 bg-slate-800 hover:bg-slate-800'}`}>
                     <label className="flex items-center justify-between p-3 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <input 
+                          id={`edit-session-module-checkbox-${m.id}`}
+                          data-testid={`edit-session-module-checkbox-${m.id}`}
                           type="checkbox"
                           checked={selectedModules.has(m.id)}
                           onChange={() => toggleModule(m.id)}
@@ -344,6 +357,8 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
                     {selectedModules.has(m.id) && (
                       <div className="pl-10 pr-3 pb-3">
                         <select
+                          id={`edit-session-module-assign-${m.id}`}
+                          data-testid={`edit-session-module-assign-${m.id}`}
                           value={assignments[m.id] || ''}
                           onChange={(e) => setAssignments({ ...assignments, [m.id]: e.target.value })}
                           className="w-full bg-slate-800 border border-indigo-500/30 rounded-lg px-3 py-2 text-sm text-indigo-200 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -365,6 +380,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
              {metadata.totalPages > 1 && (
                <div className="flex justify-between items-center bg-slate-800 p-2 rounded-lg shrink-0 mt-3 border border-slate-800">
                   <button 
+                    data-testid="edit-session-prev-page-btn"
                     type="button"
                     disabled={page === 1}
                     onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -374,6 +390,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
                   </button>
                   <span className="text-white/70 text-xs font-medium tracking-wide">Page {page} of {metadata.totalPages}</span>
                   <button 
+                    data-testid="edit-session-next-page-btn"
                     type="button"
                     disabled={page >= metadata.totalPages}
                     onClick={() => setPage(p => Math.min(metadata.totalPages, p + 1))}
@@ -387,6 +404,8 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
 
           <div className="pt-2 shrink-0">
             <button 
+              id="edit-session-submit-btn"
+              data-testid="edit-session-submit-btn"
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm  hover:   disabled:opacity-50 disabled:hover:scale-100"

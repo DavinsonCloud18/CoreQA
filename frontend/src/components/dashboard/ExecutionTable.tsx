@@ -182,13 +182,15 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div data-testid="execution-table-container" className="flex flex-col gap-6">
       <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="flex-1 w-full relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg className="w-5 h-5 text-indigo-300/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
           <input 
+            id="execution-search-input"
+            data-testid="execution-search-input"
             type="text" 
             placeholder="Search testcase..."
             value={searchQuery}
@@ -203,6 +205,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
             <span className="text-sm font-semibold hidden md:block">Filters</span>
           </div>
           <select 
+            id="execution-filter-module"
+            data-testid="execution-filter-module"
             value={filterModuleId}
             onChange={(e) => setFilterModuleId(e.target.value)}
             className="bg-black/30 border border-slate-700 rounded-lg px-4 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[150px] text-sm"
@@ -213,6 +217,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
             ))}
           </select>
           <select 
+            id="execution-filter-status"
+            data-testid="execution-filter-status"
             value={filterStatusId}
             onChange={(e) => setFilterStatusId(e.target.value)}
             className="bg-black/30 border border-slate-700 rounded-lg px-4 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[150px] text-sm"
@@ -226,7 +232,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
       </div>
 
       <div className="overflow-x-auto bg-slate-800 border border-slate-800 rounded-2xl shadow-sm">
-        <table className="w-full text-left border-collapse">
+        <table data-testid="execution-table" className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-800 bg-white/5">
               <th className="py-4 px-6 text-indigo-200 font-semibold w-32">TC ID</th>
@@ -248,24 +254,27 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
               return (
                 <Fragment key={tc.id}>
                   <tr 
+                  data-testid={`execution-row-${tc.id}`}
                   className={`border-b border-slate-800 hover:bg-white/5 transition-colors cursor-pointer ${expandedRowId === tc.id ? 'bg-white/5' : ''}`}
                   onClick={() => toggleRow(tc.id)}
                 >
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
-                      <svg className={`w-4 h-4 text-indigo-400 transition-transform ${expandedRowId === tc.id ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                      <button data-testid={`execution-expand-btn-${tc.id}`} type="button" className="focus:outline-none">
+                        <svg className={`w-4 h-4 text-indigo-400 transition-transform ${expandedRowId === tc.id ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                      </button>
                       <div>
-                        <div className="font-bold text-white whitespace-nowrap">{getUniqueTcId(tc)}</div>
+                        <div data-testid={`execution-tc-id-${tc.id}`} className="font-bold text-white whitespace-nowrap">{getUniqueTcId(tc)}</div>
                         <div className="text-xs text-indigo-300/50 font-mono mt-1" title="Unique Execution ID">#{tc.id.substring(0, 6)}</div>
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="font-semibold text-white">{tc.testcase.title}</div>
+                    <div data-testid={`execution-tc-title-${tc.id}`} className="font-semibold text-white">{tc.testcase.title}</div>
                     {tc.testcase.description && <div className="text-sm text-indigo-200/70 mt-1">{tc.testcase.description}</div>}
                   </td>
-                  <td className="py-4 px-6 text-white/80 text-sm">{tc.testcase.expectedResult}</td>
-                  <td className="py-4 px-6">
+                  <td data-testid={`execution-tc-expected-${tc.id}`} className="py-4 px-6 text-white/80 text-sm">{tc.testcase.expectedResult}</td>
+                  <td data-testid={`execution-tc-assignee-${tc.id}`} className="py-4 px-6">
                     {claim && claim.claimedBy ? (
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] border border-indigo-500/30">
@@ -279,6 +288,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                   </td>
                   <td className="py-4 px-6 relative" onClick={(e) => e.stopPropagation()} title={tooltipMsg}>
                     <select
+                      id={`execution-tc-status-select-${tc.id}`}
+                      data-testid={`execution-tc-status-select-${tc.id}`}
                       value={tc.statusId}
                       onChange={(e) => handleStatusChange(tc, Number(e.target.value), tc.statusId)}
                       disabled={isSessionLocked || !claimedByMe}
@@ -298,14 +309,14 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                       ))}
                     </select>
                   </td>
-                  <td className="py-4 px-6 text-white/70 text-sm max-w-[200px] truncate" title={tc.notes}>
+                  <td data-testid={`execution-tc-notes-${tc.id}`} className="py-4 px-6 text-white/70 text-sm max-w-[200px] truncate" title={tc.notes}>
                     {tc.notes || '-'}
                   </td>
                 </tr>
                 {expandedRowId === tc.id && (
-                  <tr className="bg-slate-800 border-b border-slate-800">
+                  <tr data-testid={`execution-expanded-row-${tc.id}`} className="bg-slate-800 border-b border-slate-800">
                     <td colSpan={6} className="p-0">
-                      <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner ">
+                      <div data-testid={`execution-steps-container-${tc.id}`} className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner ">
                         <h4 className="text-indigo-200 font-bold mb-4 flex items-center gap-2">
                           <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                           Test Steps
@@ -324,7 +335,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                               const stepStatusName = stepExec?.status?.name || 'TO DO';
 
                               return (
-                                <li key={step.id} className={`grid grid-cols-12 gap-4 p-3 items-center hover:bg-white/5 transition-colors ${index !== tc.testcase.steps.length - 1 ? 'border-b border-slate-800' : ''}`}>
+                                <li key={step.id} data-testid={`execution-step-item-${step.id}`} className={`grid grid-cols-12 gap-4 p-3 items-center hover:bg-white/5 transition-colors ${index !== tc.testcase.steps.length - 1 ? 'border-b border-slate-800' : ''}`}>
                                   <div className="col-span-1 flex justify-center">
                                     <div className="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold font-mono">
                                       {step.sequence}
@@ -334,6 +345,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                                   <div className="col-span-4 text-emerald-300/80 text-sm leading-snug">{step.expectedResult}</div>
                                   <div className="col-span-2 flex justify-center" title={tooltipMsg}>
                                     <select
+                                      id={`execution-step-status-select-${step.id}`}
+                                      data-testid={`execution-step-status-select-${step.id}`}
                                       value={stepStatusId}
                                       onChange={(e) => handleStepStatusChange(tc, step.id, Number(e.target.value), stepStatusId)}
                                       disabled={isSessionLocked || !claimedByMe}
@@ -371,7 +384,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
           })}
             {filteredTestcases.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-white/50 bg-white/5">
+                <td data-testid="execution-empty-state" colSpan={5} className="py-12 text-center text-white/50 bg-white/5">
                   <div className="flex flex-col items-center gap-3">
                     <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>No testcases found matching your criteria.</span>
@@ -385,7 +398,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
       {/* Notes Modal */}
       {notesModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4   ">
+        <div data-testid="execution-notes-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4   ">
           <div className="bg-[#0f1117] border border-slate-800 rounded-2xl p-5 w-full max-w-sm shadow-sm relative overflow-hidden">
             {/* Dynamic Styling based on Status */}
             {(() => {
@@ -409,6 +422,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                   </div>
 
                   <textarea
+                    id="execution-notes-textarea"
+                    data-testid="execution-notes-textarea"
                     value={notesModal.notes}
                     onChange={(e) => setNotesModal({ ...notesModal, notes: e.target.value })}
                     onKeyDown={(e) => {
@@ -423,12 +438,16 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
                   <div className="flex justify-end gap-2 mt-4">
                     <button 
+                      id="execution-notes-cancel-btn"
+                      data-testid="execution-notes-cancel-btn"
                       onClick={() => setNotesModal({ ...notesModal, isOpen: false })}
                       className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-slate-900 transition-colors text-sm font-semibold"
                     >
                       Cancel
                     </button>
                     <button 
+                      id="execution-notes-save-btn"
+                      data-testid="execution-notes-save-btn"
                       onClick={() => submitStatusUpdate(notesModal.type, notesModal.testcaseId, notesModal.stepId, notesModal.statusId, notesModal.notes)}
                       className={`px-5 py-2 rounded-lg font-bold  text-sm ${btnClass}`}
                     >
@@ -444,7 +463,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
       {/* Restriction Modal */}
       {restrictionModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4   ">
+        <div data-testid="execution-restriction-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  p-4   ">
           <div className="bg-[#0f1117] border border-rose-500/30 rounded-2xl p-6 w-full max-w-md shadow-[0_0_50px_rgba(244,63,94,0.15)] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-indigo-600"></div>
             
@@ -458,12 +477,14 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
               </div>
             </div>
 
-            <p className="text-white/80 text-sm leading-relaxed mb-6 bg-rose-950/20 p-4 rounded-xl border border-rose-900/30">
+            <p data-testid="execution-restriction-message" className="text-white/80 text-sm leading-relaxed mb-6 bg-rose-950/20 p-4 rounded-xl border border-rose-900/30">
               {restrictionModal.message}
             </p>
 
             <div className="flex justify-end">
               <button 
+                id="execution-restriction-close-btn"
+                data-testid="execution-restriction-close-btn"
                 onClick={() => setRestrictionModal({ isOpen: false, message: '' })}
                 className="px-6 py-2 bg-slate-900 hover:bg-white/20 text-white rounded-xl font-bold  text-sm"
               >

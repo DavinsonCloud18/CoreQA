@@ -86,22 +86,27 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+    <div data-testid="module-detail-container" className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
       
       
       <div className="relative z-10 mb-8 pb-6 border-b border-slate-800 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
         <div className="flex gap-4 items-center">
-          <button onClick={onBack} className="p-3 bg-white/5 hover:bg-slate-900 rounded-xl text-white/70 hover:text-white transition-colors border border-slate-800">
+          <button 
+            id="module-detail-back-btn"
+            data-testid="module-detail-back-btn"
+            onClick={onBack} 
+            className="p-3 bg-white/5 hover:bg-slate-900 rounded-xl text-white/70 hover:text-white transition-colors border border-slate-800"
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
           </button>
           <div>
             <div className="flex items-center gap-3">
-              <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 font-bold text-xs rounded-md border border-indigo-500/30">
+              <span data-testid="module-detail-code" className="px-2 py-1 bg-indigo-500/20 text-indigo-300 font-bold text-xs rounded-md border border-indigo-500/30">
                 {module.code}
               </span>
-              <h2 className="text-2xl font-bold text-white">{module.name}</h2>
+              <h2 data-testid="module-detail-name" className="text-2xl font-bold text-white">{module.name}</h2>
             </div>
-            <p className="text-white/50 text-sm mt-1">{module.description}</p>
+            <p data-testid="module-detail-desc" className="text-white/50 text-sm mt-1">{module.description}</p>
           </div>
         </div>
       </div>
@@ -110,6 +115,8 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
         <div className="relative w-full sm:w-64">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           <input 
+            id="module-detail-search-input"
+            data-testid="module-detail-search-input"
             type="text" 
             placeholder="Search testcases..." 
             value={searchQuery}
@@ -118,6 +125,8 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
           />
         </div>
         <button 
+          id="module-detail-add-tc-btn"
+          data-testid="module-detail-add-tc-btn"
           onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
           className="px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:  text-sm whitespace-nowrap w-full sm:w-auto"
         >
@@ -126,7 +135,7 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
       </div>
 
       <div className="relative z-10 overflow-x-auto bg-slate-800 rounded-2xl border border-slate-800">
-        <table className="w-full text-left border-collapse min-w-[600px]">
+        <table data-testid="module-detail-table" className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="border-b border-slate-800 bg-white/5">
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">ID</th>
@@ -142,41 +151,46 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
             {displayedTestcases.map((tc: any) => (
               <React.Fragment key={tc.id}>
                 <tr 
+                  data-testid={`module-detail-row-${tc.id}`}
                   className={`hover:bg-white/5 transition-colors group cursor-pointer ${expandedTc === tc.id ? 'bg-white/5' : ''}`}
                   onClick={() => setExpandedTc(expandedTc === tc.id ? null : tc.id)}
                 >
                   <td className="py-4 px-6 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <svg className={`w-4 h-4 text-indigo-400 transition-transform ${expandedTc === tc.id ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
-                      <span className="text-xs font-bold px-2 py-1 bg-slate-900 rounded-md text-white/70 border border-slate-800">{tc.testcaseId}</span>
+                      <span data-testid={`module-detail-tc-id-${tc.id}`} className="text-xs font-bold px-2 py-1 bg-slate-900 rounded-md text-white/70 border border-slate-800">{tc.testcaseId}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="font-bold text-white leading-tight">{tc.title}</span>
+                    <span data-testid={`module-detail-tc-title-${tc.id}`} className="font-bold text-white leading-tight">{tc.title}</span>
                   </td>
                   <td className="py-4 px-6 whitespace-nowrap">
                     <span className="text-indigo-300 text-xs font-semibold">{module.name}</span>
                   </td>
                   <td className="py-4 px-6">
-                    <p className="text-white/70 text-xs line-clamp-2 w-48" title={tc.expectedResult}>{tc.expectedResult || '-'}</p>
+                    <p data-testid={`module-detail-tc-expected-${tc.id}`} className="text-white/70 text-xs line-clamp-2 w-48" title={tc.expectedResult}>{tc.expectedResult || '-'}</p>
                   </td>
                   <td className="py-4 px-6 whitespace-nowrap">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border ${tc.priority === 'High' || tc.priority === 'Critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : tc.priority === 'Medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'}`}>
+                    <span data-testid={`module-detail-tc-priority-${tc.id}`} className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border ${tc.priority === 'High' || tc.priority === 'Critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : tc.priority === 'Medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'}`}>
                       {tc.priority}
                     </span>
                   </td>
                   <td className="py-4 px-6 whitespace-nowrap">
-                    <span className="text-xs font-semibold text-white/70">{tc.createdBy?.name || '-'}</span>
+                    <span data-testid={`module-detail-tc-creator-${tc.id}`} className="text-xs font-semibold text-white/70">{tc.createdBy?.name || '-'}</span>
                   </td>
                   <td className="py-4 px-6 whitespace-nowrap text-right">
                     <div className="flex justify-end gap-2">
                       <button 
+                        id={`module-detail-edit-tc-btn-${tc.id}`}
+                        data-testid={`module-detail-edit-tc-btn-${tc.id}`}
                         onClick={(e) => { e.stopPropagation(); setEditingItem(tc); setIsFormOpen(true); }} 
                         className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-slate-900 text-white font-medium text-xs transition-colors"
                       >
                         Edit
                       </button>
                       <button 
+                        id={`module-detail-delete-tc-btn-${tc.id}`}
+                        data-testid={`module-detail-delete-tc-btn-${tc.id}`}
                         onClick={(e) => handleDelete(tc.id, e)} 
                         className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-medium text-xs transition-colors border border-rose-500/20"
                       >
@@ -186,9 +200,9 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
                   </td>
                 </tr>
                 {expandedTc === tc.id && (
-                  <tr className="bg-slate-800 border-b border-slate-800">
+                  <tr data-testid={`module-detail-expanded-row-${tc.id}`} className="bg-slate-800 border-b border-slate-800">
                     <td colSpan={6} className="p-0">
-                      <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner">
+                      <div data-testid={`module-detail-steps-${tc.id}`} className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner">
                         <div className="space-y-6">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -238,7 +252,7 @@ export function ModuleDetail({ moduleId, onBack }: { moduleId: string, onBack: (
             ))}
             {displayedTestcases.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-white/40">
+                <td data-testid="module-detail-empty" colSpan={5} className="py-12 text-center text-white/40">
                   No testcases found in this category.
                 </td>
               </tr>

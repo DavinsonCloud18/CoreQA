@@ -126,16 +126,18 @@ export function TestcaseManagement() {
   );
 
   return (
-    <div className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+    <div data-testid="testcase-management-container" className="bg-slate-900 border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
       
       
       <div className="relative z-10 flex flex-col xl:flex-row gap-6 mb-8 items-start xl:items-center justify-between border-b border-slate-800 pb-6">
         <div className="flex gap-4 w-full xl:w-auto">
           <div className="flex-1 sm:w-64">
-            <label className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Search</label>
+            <label htmlFor="testcase-mgmt-search-input" className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Search</label>
             <div className="relative">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               <input 
+                id="testcase-mgmt-search-input"
+                data-testid="testcase-mgmt-search-input"
                 type="text" 
                 placeholder="ID or Title..." 
                 value={searchQuery}
@@ -145,9 +147,11 @@ export function TestcaseManagement() {
             </div>
           </div>
           <div className="flex-1 sm:w-48">
-            <label className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Module</label>
+            <label htmlFor="testcase-mgmt-filter-module" className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Module</label>
             <div className="relative">
               <select 
+                id="testcase-mgmt-filter-module"
+                data-testid="testcase-mgmt-filter-module"
                 value={filterModule}
                 onChange={e => setFilterModule(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-3 pr-10 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
@@ -159,9 +163,11 @@ export function TestcaseManagement() {
             </div>
           </div>
           <div className="flex-1 sm:w-48">
-            <label className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Creator</label>
+            <label htmlFor="testcase-mgmt-filter-user" className="text-xs font-bold text-white/50 mb-1 block uppercase tracking-wider">Creator</label>
             <div className="relative">
               <select 
+                id="testcase-mgmt-filter-user"
+                data-testid="testcase-mgmt-filter-user"
                 value={filterUser}
                 onChange={e => setFilterUser(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-800 rounded-xl py-2 pl-3 pr-10 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
@@ -176,6 +182,8 @@ export function TestcaseManagement() {
 
         <div className="flex items-center gap-4 w-full xl:w-auto">
           <button 
+            id="testcase-mgmt-add-btn"
+            data-testid="testcase-mgmt-add-btn"
             onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
             className="flex-1 xl:flex-none px-5 py-2.5 bg-indigo-600 rounded-xl font-bold text-white shadow-sm hover:  whitespace-nowrap text-sm"
           >
@@ -185,7 +193,7 @@ export function TestcaseManagement() {
       </div>
 
       <div className="relative z-10 overflow-x-auto bg-slate-800 rounded-2xl border border-slate-800">
-        <table className="w-full text-left border-collapse min-w-[800px]">
+        <table data-testid="testcase-mgmt-table" className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="border-b border-slate-800 bg-white/5">
               <th className="py-4 px-6 font-bold text-white/50 uppercase tracking-wider text-xs">ID</th>
@@ -203,40 +211,44 @@ export function TestcaseManagement() {
               return (
                 <React.Fragment key={tc.id}>
                   <tr 
+                    data-testid={`testcase-row-${tc.id}`}
                     className={`hover:bg-white/5 transition-colors group cursor-pointer ${isHighlighted || expandedTc === tc.id ? 'bg-indigo-500/10' : ''}`}
                     onClick={() => setExpandedTc(expandedTc === tc.id ? null : tc.id)}
                   >
                     <td className="py-4 px-6 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <svg className={`w-4 h-4 text-indigo-400 transition-transform ${expandedTc === tc.id ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
-                        <span className="text-xs font-bold px-2 py-1 bg-slate-900 rounded-md text-white/70 border border-slate-800">{tc.testcaseId}</span>
+                        <span data-testid={`testcase-id-${tc.id}`} className="text-xs font-bold px-2 py-1 bg-slate-900 rounded-md text-white/70 border border-slate-800">{tc.testcaseId}</span>
                       </div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-white leading-tight">{tc.title}</span>
+                        <span data-testid={`testcase-title-${tc.id}`} className="font-bold text-white leading-tight">{tc.title}</span>
                         {tc.isDeleted && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded uppercase tracking-wider">Deleted</span>}
                       </div>
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap">
-                      <span className="text-indigo-300 text-xs font-semibold">{tc.module.name}</span>
+                      <span data-testid={`testcase-module-${tc.id}`} className="text-indigo-300 text-xs font-semibold">{tc.module.name}</span>
                     </td>
                     <td className="py-4 px-6">
-                      <p className="text-white/70 text-xs line-clamp-2 w-48" title={tc.expectedResult}>{tc.expectedResult || '-'}</p>
+                      <p data-testid={`testcase-expected-${tc.id}`} className="text-white/70 text-xs line-clamp-2 w-48" title={tc.expectedResult}>{tc.expectedResult || '-'}</p>
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap">
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border ${tc.priority === 'High' || tc.priority === 'Critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : tc.priority === 'Medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'}`}>
+                      <span data-testid={`testcase-priority-${tc.id}`} className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border ${tc.priority === 'High' || tc.priority === 'Critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : tc.priority === 'Medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'}`}>
                         {tc.priority}
                       </span>
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap">
-                      <span className="text-xs font-semibold text-white/70">{tc.createdBy?.name || '-'}</span>
+                      <span data-testid={`testcase-creator-${tc.id}`} className="text-xs font-semibold text-white/70">{tc.createdBy?.name || '-'}</span>
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap text-right">
                       <div className="flex justify-end gap-2">
                         {!tc.isDeleted && (
                           <>
-                            <button onClick={async (e) => {
+                            <button 
+                              id={`testcase-edit-btn-${tc.id}`}
+                              data-testid={`testcase-edit-btn-${tc.id}`}
+                              onClick={async (e) => {
                                e.stopPropagation();
                                const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
                                const authData = JSON.parse(localStorage.getItem('auth') || '{}');
@@ -247,18 +259,32 @@ export function TestcaseManagement() {
                                }
                             }} className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-slate-900 text-white font-medium text-xs transition-colors">Edit</button>
                             
-                            <button onClick={(e) => { e.stopPropagation(); handleDelete(tc.id); }} className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-medium text-xs transition-colors border border-rose-500/20">Delete</button>
+                            <button 
+                              id={`testcase-delete-btn-${tc.id}`}
+                              data-testid={`testcase-delete-btn-${tc.id}`}
+                              onClick={(e) => { e.stopPropagation(); handleDelete(tc.id); }} 
+                              className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-medium text-xs transition-colors border border-rose-500/20"
+                            >
+                              Delete
+                            </button>
                           </>
                         )}
                         {tc.isDeleted && (
-                          <button onClick={(e) => { e.stopPropagation(); handleRevive(tc.id); }} className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-medium text-xs transition-colors border border-emerald-500/20">Revive</button>
+                          <button 
+                            id={`testcase-revive-btn-${tc.id}`}
+                            data-testid={`testcase-revive-btn-${tc.id}`}
+                            onClick={(e) => { e.stopPropagation(); handleRevive(tc.id); }} 
+                            className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-medium text-xs transition-colors border border-emerald-500/20"
+                          >
+                            Revive
+                          </button>
                         )}
                       </div>
                     </td>
                   </tr>
                   
                   {expandedTc === tc.id && (
-                    <tr className="bg-slate-800 border-b border-slate-800">
+                    <tr data-testid={`testcase-expanded-row-${tc.id}`} className="bg-slate-800 border-b border-slate-800">
                       <td colSpan={7} className="p-0">
                         <div className="p-6 m-4 ml-12 rounded-xl border border-indigo-500/20 bg-indigo-950/20 shadow-inner">
                           <div className="space-y-6">
@@ -311,7 +337,7 @@ export function TestcaseManagement() {
             })}
             {filteredTestcases.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-white/50">
+                <td data-testid="testcase-mgmt-empty" colSpan={6} className="py-12 text-center text-white/50">
                   No testcases found matching your criteria.
                 </td>
               </tr>

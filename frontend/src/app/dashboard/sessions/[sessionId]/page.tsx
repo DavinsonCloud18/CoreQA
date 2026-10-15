@@ -20,23 +20,23 @@ export default async function DashboardPage({ params }: { params: Promise<{ sess
   const data = await fetchAnalytics(resolvedParams.sessionId);
   
   return (
-    <div className="min-h-screen relative flex bg-slate-950">
+    <div className="min-h-screen relative flex bg-slate-950" id="session-analytics-page" data-testid="session-analytics-page">
       {/* Dark overlay matching login page */}
       
 
       <Sidebar />
 
-      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
+      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto" data-testid="session-analytics-content">
         <div className="w-full space-y-8 pb-12">
           {/* Header */}
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm" data-testid="session-analytics-header">
             <div>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-sm ">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">CoreQA Analytics</h1>
+                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md" data-testid="session-analytics-header-title">CoreQA Analytics</h1>
                   <p className="text-indigo-200 font-medium text-sm mt-0.5">Real-time Session Monitoring</p>
                 </div>
               </div>
@@ -46,7 +46,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ sess
 
           
           {data?.session && (
-             <div className="flex items-center gap-4 bg-slate-900 border border-slate-700 px-6 py-4 rounded-[2rem] shadow-sm">
+             <div className="flex items-center gap-4 bg-slate-900 border border-slate-700 px-6 py-4 rounded-[2rem] shadow-sm" data-testid="session-info-banner">
                 <div className="flex-1">
                    <h2 className="text-xl font-bold text-white">{data.session.name}</h2>
                    <div className="flex items-center gap-2 mt-2">
@@ -68,7 +68,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ sess
           <SummaryCards summary={data.summary} />
 
           
-          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+          <section className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden" data-testid="session-failed-modules-section">
             
             <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
               <span className="w-2 h-6 bg-rose-500 rounded-full inline-block shadow-[0_0_10px_rgba(244,63,94,0.6)]"></span>
