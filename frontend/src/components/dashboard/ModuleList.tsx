@@ -69,7 +69,7 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
     const searchMatch = `${module.name || ''} ${module.code || ''} ${module.description || ''}`.toLowerCase().includes(query.trim().toLowerCase());
     const status = (module.statusBreakdown?.['FAILED'] || 0) > 0 ? 'failed'
       : (module.statusBreakdown?.['BLOCKED'] || 0) > 0 ? 'blocked'
-      : (module.testcaseCount || 0) > 0 && (module.statusBreakdown?.['TO DO'] || 0) + (module.statusBreakdown?.['UNTESTED'] || 0) === 0 ? 'done' : 'todo';
+        : (module.testcaseCount || 0) > 0 && (module.statusBreakdown?.['TO DO'] || 0) + (module.statusBreakdown?.['UNTESTED'] || 0) === 0 ? 'done' : 'todo';
     return searchMatch && (statusFilter === 'all' || status === statusFilter);
   }), [modules, query, statusFilter]);
 
@@ -79,7 +79,7 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
       try {
         const parsed = JSON.parse(authData);
         setCurrentUser(parsed.user);
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -96,13 +96,13 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
       const authData = JSON.parse(localStorage.getItem('auth') || '{}');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/sessions/${sessionId}/modules/${moduleId}/claim`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authData.access_token}`
         },
         body: JSON.stringify({ userId: currentUser.id })
       });
-      
+
       if (res.ok) {
         window.location.reload();
       } else {
@@ -120,7 +120,7 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
   const handleClaimClick = (e: React.MouseEvent, m: any) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isAdmin) {
       alert('Super Admin tidak dapat melakukan claim module atau testcase.');
       return;
@@ -150,7 +150,7 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
 
   if (!modules || modules.length === 0) {
     return (
-      <div className="w-full h-32 flex items-center justify-center border-2 border-dashed border-slate-700 rounded-2xl">
+      <div className="w-full h-32 flex items-center justify-center border-2 border-dashed border-slate-700 rounded-2xl" data-testid="module-list-empty">
         <p className="text-white/50 text-center font-medium">No modules assigned to this session.</p>
       </div>
     );
@@ -159,16 +159,29 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
   return (
     <>
       <div className="mb-4 flex flex-col sm:flex-row gap-3">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari modul berdasarkan nama, kode, atau deskripsi..." aria-label="Cari modul"
-          className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter status modul"
-          className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white">
+        <input
+          id="module-search-input"
+          data-testid="module-search-input"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Cari modul berdasarkan nama, kode, atau deskripsi..."
+          aria-label="Cari modul"
+          className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <select
+          id="module-status-filter"
+          data-testid="module-status-filter"
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          aria-label="Filter status modul"
+          className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white"
+        >
           <option value="all">Semua status</option><option value="todo">Belum selesai</option><option value="done">Selesai</option><option value="failed">Ada gagal</option><option value="blocked">Terblokir</option>
         </select>
         <ViewToggle value={view} onChange={setView} />
       </div>
-      <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6' : 'flex flex-col gap-3'}>
-        {filteredModules.length === 0 ? <div className="col-span-full rounded-xl border border-slate-700 bg-slate-950/40 py-10 text-center text-sm text-slate-400">Tidak ada modul yang cocok dengan pencarian atau filter.</div> : filteredModules.map((m: any) => {
+      <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6' : 'flex flex-col gap-3'} data-testid="module-container">
+        {filteredModules.length === 0 ? <div className="col-span-full rounded-xl border border-slate-700 bg-slate-950/40 py-10 text-center text-sm text-slate-400" data-testid="module-no-match">Tidak ada modul yang cocok dengan pencarian atau filter.</div> : filteredModules.map((m: any) => {
           const passedCount = m.statusBreakdown?.['PASSED'] || 0;
           const notesCount = m.statusBreakdown?.['PASSED WITH NOTES'] || 0;
           const failedCount = m.statusBreakdown?.['FAILED'] || 0;
@@ -181,15 +194,20 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
           const effectiveTotal = totalTestcases - droppedCount;
           const executedCount = totalTestcases - (todoCount + untestedCount);
           const totalPassed = passedCount + notesCount;
-          
+
           const completionPct = totalTestcases > 0 ? Math.round((executedCount / totalTestcases) * 100) : 0;
           const passedPct = effectiveTotal > 0 ? Math.round((totalPassed / effectiveTotal) * 100) : 0;
-          
+
           const isDone = (todoCount + untestedCount) === 0 && failedCount === 0 && blockedCount === 0 && effectiveTotal > 0;
 
           if (view === 'list') return (
-            <Link href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`} key={m.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 hover:border-indigo-400 sm:gap-4 sm:px-4">
-              <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h3 className="truncate text-sm font-semibold text-white">{m.name}</h3><span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-indigo-300">{m.code || 'MOD'}</span></div><p className="mt-1 truncate text-xs text-slate-400">{m.testcaseCount || 0} test cases{m.isClaimed ? ` · Claimed by ${m.claimedBy}` : ' · Unclaimed'}</p></div>
+            <Link
+              href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`}
+              key={m.id}
+              data-testid={`module-item-${m.id}`}
+              className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 hover:border-indigo-400 sm:gap-4 sm:px-4"
+            >
+              <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h3 className="truncate text-sm font-semibold text-white" data-testid="module-name">{m.name}</h3><span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-indigo-300" data-testid="module-code">{m.code || 'MOD'}</span></div><p className="mt-1 truncate text-xs text-slate-400">{m.testcaseCount || 0} test cases{m.isClaimed ? ` · Claimed by ${m.claimedBy}` : ' · Unclaimed'}</p></div>
               <div className="flex shrink-0 items-center gap-2 whitespace-nowrap text-[11px] sm:gap-4 sm:text-xs"><span className="whitespace-nowrap text-indigo-300">{completionPct}% executed</span><span className="whitespace-nowrap text-emerald-400">{passedPct}% passed</span></div>
               {isAdmin ? (
                 <span className="shrink-0 whitespace-nowrap text-right text-xs font-semibold text-indigo-300">View →</span>
@@ -204,11 +222,12 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
               )}
             </Link>
           );
-          
+
           return (
-            <Link 
+            <Link
               href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`}
               key={m.id}
+              data-testid={`module-card-${m.id}`}
               className={`group p-5 rounded-2xl bg-slate-900 border border-slate-700 hover:border-indigo-400 transition-colors relative ${view === 'grid' ? 'flex flex-col justify-between' : 'flex flex-col md:flex-row md:items-center gap-5'}`}
             >
               <div className="relative z-10 flex flex-col h-full">
@@ -219,11 +238,11 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-lg font-bold text-white group-hover:text-indigo-200 transition-colors line-clamp-1">{m.name}</h3>
+                      <h3 className="text-lg font-bold text-white group-hover:text-indigo-200 transition-colors line-clamp-1" data-testid="module-name">{m.name}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] text-slate-400 font-medium tracking-wide bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">{m.code || 'MOD'}</span>
+                        <span className="text-[10px] text-slate-400 font-medium tracking-wide bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700" data-testid="module-code">{m.code || 'MOD'}</span>
                         {isDone && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-[9px] uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1">
+                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-[9px] uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1" data-testid="module-done-badge">
                             <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                             Done
                           </span>
@@ -233,8 +252,8 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-400 mb-4 line-clamp-2 h-8">{m.description || 'No description available for this module.'}</p>
-                
+                <p className="text-xs text-slate-400 mb-4 line-clamp-2 h-8" data-testid="module-desc">{m.description || 'No description available for this module.'}</p>
+
                 {/* Progress Indicators */}
                 <div className="mb-4 space-y-3">
                   {/* Executed Progress */}
@@ -262,21 +281,21 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
 
                 {/* Claim / Execution Action */}
                 <div className="flex items-center justify-between border-t border-slate-800 pt-4 mt-auto">
-                  
+
                   {/* Claim Status */}
                   <div className="flex items-center gap-2">
                     {m.isClaimed ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" data-testid="module-claimed-status">
                         <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-[10px]">
                           {m.claimedBy.substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Claimed by</span>
-                          <span className="text-[11px] text-white font-medium truncate max-w-[60px]">{m.claimedBy}</span>
+                          <span className="text-[11px] text-white font-medium truncate max-w-[60px]" data-testid="module-claimed-by">{m.claimedBy}</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col">
+                      <div className="flex flex-col" data-testid="module-unclaimed-status">
                         <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Status</span>
                         <span className="text-[11px] text-amber-400 font-medium">Unclaimed</span>
                       </div>
@@ -289,14 +308,16 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
                       View <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </span>
                   ) : (!m.isClaimed || (m.isClaimed && m.claimedById !== currentUser?.id)) ? (
-                    <button 
-                       onClick={(e) => handleClaimClick(e, m)}
-                       className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-colors z-20 relative"
-                     >
-                       {m.isClaimed ? 'Take Over' : 'Claim'}
-                     </button>
+                    <button
+                      id={`module-claim-btn-${m.id}`}
+                      data-testid={`module-claim-btn-${m.id}`}
+                      onClick={(e) => handleClaimClick(e, m)}
+                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-colors z-20 relative"
+                    >
+                      {m.isClaimed ? 'Take Over' : 'Claim'}
+                    </button>
                   ) : (
-                    <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 group-hover:text-emerald-300 transition-colors bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                    <span data-testid="module-execute-badge" className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 group-hover:text-emerald-300 transition-colors bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
                       Execute <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </span>
                   )}
@@ -310,28 +331,32 @@ export function ModuleList({ modules: initialModules, sessionId }: { modules: an
 
       {/* Takeover Confirmation Modal */}
       {takeoverModal.isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-testid="module-takeover-modal">
           <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-md w-full shadow-xl relative">
             <div className="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center border border-rose-500/30 mb-6 mx-auto shadow-[0_0_15px_rgba(244,63,94,0.3)]">
               <svg className="w-8 h-8 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
               </svg>
             </div>
-            
-            <h2 className="text-2xl font-black text-white text-center mb-2">Takeover Module?</h2>
-            <p className="text-slate-300 text-center text-sm mb-8 leading-relaxed">
+
+            <h2 className="text-2xl font-black text-white text-center mb-2" data-testid="module-takeover-modal-title">Takeover Module?</h2>
+            <p className="text-slate-300 text-center text-sm mb-8 leading-relaxed" data-testid="module-takeover-modal-desc">
               Module <strong className="text-white font-bold">{takeoverModal.moduleName}</strong> is currently claimed by <strong className="text-rose-300 font-bold">{takeoverModal.currentOwner}</strong>. Are you sure you want to take over their claim?
             </p>
-            
+
             <div className="flex gap-4">
-              <button 
+              <button
+                id="module-takeover-cancel-btn"
+                data-testid="module-takeover-cancel-btn"
                 onClick={cancelTakeover}
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors disabled:opacity-50 border border-slate-700"
               >
                 Cancel
               </button>
-              <button 
+              <button
+                id="module-takeover-confirm-btn"
+                data-testid="module-takeover-confirm-btn"
                 onClick={confirmTakeover}
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-3 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-500 transition-colors shadow-[0_0_15px_rgba(225,29,72,0.4)] disabled:opacity-50 flex justify-center items-center"

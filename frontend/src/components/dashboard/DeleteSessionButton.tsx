@@ -48,6 +48,8 @@ export function DeleteSessionButton({ session }: { session: any }) {
   return (
     <>
       <button
+        id="delete-session-btn"
+        data-testid="delete-session-btn"
         onClick={() => setIsModalOpen(true)}
         disabled={isDeleting}
         className="flex items-center justify-center gap-2 px-4 h-10 rounded-xl text-sm font-bold transition-colors bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30"
@@ -59,7 +61,7 @@ export function DeleteSessionButton({ session }: { session: any }) {
       </button>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+        <div data-testid="delete-session-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
             
@@ -79,6 +81,8 @@ export function DeleteSessionButton({ session }: { session: any }) {
 
             <div className="flex justify-end gap-3 mt-2">
               <button
+                id="delete-session-cancel-btn"
+                data-testid="delete-session-cancel-btn"
                 onClick={() => setIsModalOpen(false)}
                 disabled={isDeleting}
                 className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors border border-slate-700"
@@ -86,6 +90,8 @@ export function DeleteSessionButton({ session }: { session: any }) {
                 Cancel
               </button>
               <button
+                id="delete-session-confirm-btn"
+                data-testid="delete-session-confirm-btn"
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="px-4 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition-colors shadow-[0_0_15px_rgba(225,29,72,0.3)]"

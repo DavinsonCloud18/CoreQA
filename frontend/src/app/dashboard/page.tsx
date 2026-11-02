@@ -40,7 +40,7 @@ function getWorkingDaysLeft(endDate: string | Date) {
   end.setHours(0, 0, 0, 0);
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  
+
   if (end.getTime() < now.getTime()) {
     let overdueCount = 0;
     let cur = new Date(end);
@@ -95,48 +95,48 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
       })
     );
   }
-  
+
   return (
-    <div className="min-h-screen relative flex bg-slate-950">
-      
+    <div className="min-h-screen relative flex bg-slate-950" id="global-dashboard-page" data-testid="global-dashboard-page">
+
 
       <Sidebar />
 
-      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
+      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto" data-testid="dashboard-content">
         <div className="w-full space-y-8 pb-12">
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm" data-testid="dashboard-header">
             <div className="flex-1">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-sm ">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">Execution Dashboard</h1>
+                  <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md" data-testid="dashboard-header-title">Execution Dashboard</h1>
                   <p className="text-indigo-200 font-medium text-sm mt-0.5">High-Level Testing Summary</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-4">
-               <HeaderProfile />
-               <NotificationBell />
-               <LogoutButton />
+              <HeaderProfile />
+              <NotificationBell />
+              <LogoutButton />
             </div>
           </header>
 
-          
-          <div className="flex justify-between items-center mb-1 pr-2 mt-4">
-            <h2 className="text-xl font-bold text-white tracking-tight">Overview</h2>
+
+          <div className="flex justify-between items-center mb-1 pr-2 mt-4" data-testid="dashboard-overview-bar">
+            <h2 className="text-xl font-bold text-white tracking-tight" data-testid="dashboard-overview-title">Overview</h2>
             <SessionSelector currentSession={resolvedParams.session} />
           </div>
 
           <SummaryCards summary={data.summary} />
-          
+
           {!isSingleSessionMode ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
               {activeSessionsWithAnalytics.map(session => (
                 <section key={session.id} className="bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-between">
-                  
+
                   <div className="w-full flex justify-between items-start mb-6 relative z-10">
                     <div className="w-full min-w-0">
                       <h2 className="text-xl font-bold text-white mb-2 truncate" title={session.name}>{session.name}</h2>
@@ -160,7 +160,9 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                     <ExecutionChart summary={session.analytics.summary} />
                   </div>
 
-                  <a 
+                  <a
+                    id={`execute-session-link-${session.id}`}
+                    data-testid={`execute-session-link-${session.id}`}
                     href={`/dashboard/execution?session=${session.id}`}
                     className="relative z-10 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-center shadow-sm flex justify-center items-center gap-2 transition-colors"
                   >
@@ -170,7 +172,7 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                 </section>
               ))}
               {activeSessionsWithAnalytics.length === 0 && (
-                <div className="col-span-full text-white/50 py-8 text-center bg-slate-800 rounded-xl border border-slate-800">
+                <div className="col-span-full text-white/50 py-8 text-center bg-slate-800 rounded-xl border border-slate-800" data-testid="no-active-sessions-message">
                   No active sessions found.
                 </div>
               )}
@@ -207,8 +209,8 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
 
               {/* User assignments on the right */}
               <section className="xl:col-span-7 2xl:col-span-8 bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
-                
-                <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
+
+                <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10" data-testid="session-team-title">
                   <span className="w-2 h-6 bg-indigo-500 rounded-full inline-block shadow-[0_0_10px_rgba(99,102,241,0.6)]"></span>
                   Team Assignments
                 </h2>

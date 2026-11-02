@@ -62,7 +62,7 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
     <div className="min-h-screen relative flex bg-slate-950">
       <Sidebar />
 
-      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto">
+      <div className="relative z-10 flex-1 p-8 text-white font-sans overflow-y-auto" data-testid="session-analytics-content">
         <div className="w-full space-y-8 pb-12">
           {/* Header */}
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-700 p-6 rounded-[2rem] shadow-sm">
@@ -131,16 +131,16 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
                       <DeleteSessionButton session={currentSession} />
                       <CloneSessionButton sessionId={currentSession.id} />
                       <EditSessionButton session={currentSession} />
-                      <CompleteSessionButton 
-                        sessionId={sessionId} 
-                        initialStatus={currentSession?.status || 'On Progress'} 
-                        isReady={isReady} 
+                      <CompleteSessionButton
+                        sessionId={sessionId}
+                        initialStatus={currentSession?.status || 'On Progress'}
+                        isReady={isReady}
                       />
                     </div>
                   </div>
 
                   <SummaryCards summary={data?.summary || {}} />
-                  
+
                   <h2 className="text-2xl font-bold mt-12 mb-6 flex items-center gap-3 text-white">
                     <span className="w-2 h-6 bg-rose-500 rounded-full inline-block shadow-[0_0_10px_rgba(244,63,94,0.6)]"></span>
                     Modules to Execute

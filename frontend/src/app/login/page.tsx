@@ -43,27 +43,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4" data-testid="login-page">
       
-      <div className="relative z-10 w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-[2rem] shadow-lg">
+      <div className="relative z-10 w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-[2rem] shadow-lg" data-testid="login-card">
         <div className="mb-8 text-center">
-          <div className="w-14 h-14 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-sm mb-5">
+          <div className="w-14 h-14 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-sm mb-5" data-testid="login-brand-logo">
             <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">CoreQA</h1>
-          <p className="text-slate-400 mt-2 text-sm font-medium">Masuk untuk mengelola test execution</p>
+          <h1 className="text-3xl font-black text-white tracking-tight" data-testid="login-title">CoreQA</h1>
+          <p className="text-slate-400 mt-2 text-sm font-medium" data-testid="login-subtitle">Masuk untuk mengelola test execution</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-sm font-medium text-center">
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-sm font-medium text-center" id="login-error-message" data-testid="login-error-message">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-5" id="login-form" data-testid="login-form">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
+            <label htmlFor="login-email-input" className="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
             <input 
+              id="login-email-input"
+              data-testid="login-email-input"
+              name="email"
               type="email" 
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -75,9 +78,12 @@ export default function LoginPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Password</label>
+            <label htmlFor="login-password-input" className="block text-sm font-medium text-slate-400 mb-2">Password</label>
             <div className="relative">
               <input 
+                id="login-password-input"
+                data-testid="login-password-input"
+                name="password"
                 type={showPassword ? 'text' : 'password'} 
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -89,6 +95,8 @@ export default function LoginPage() {
               {password && (
                 <button
                   type="button"
+                  id="login-toggle-password-btn"
+                  data-testid="login-toggle-password-btn"
                   onClick={() => setShowPassword(value => !value)}
                   className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-white transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
@@ -110,11 +118,13 @@ export default function LoginPage() {
 
           <button 
             type="submit" 
+            id="login-submit-btn"
+            data-testid="login-submit-btn"
             disabled={loading}
             className="w-full mt-2 bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2 transition-colors"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" data-testid="login-loading-spinner"></span>
             ) : 'Sign In'}
           </button>
         </form>

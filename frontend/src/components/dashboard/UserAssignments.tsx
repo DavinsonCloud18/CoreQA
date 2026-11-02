@@ -20,7 +20,7 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
 
   if (!assignments || assignments.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 bg-slate-800 rounded-2xl border border-dashed border-slate-800">
+      <div className="flex flex-col items-center justify-center py-10 bg-slate-800 rounded-2xl border border-dashed border-slate-800" data-testid="user-assignments-empty">
         <svg className="w-10 h-10 text-white/15 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
         <span className="text-white/40 text-sm font-medium">No team assignments yet</span>
         <span className="text-white/25 text-xs mt-1">Assign modules in a session to see them here</span>
@@ -34,7 +34,7 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
   );
 
   return (
-    <div className="space-y-0 max-h-[420px] overflow-y-auto custom-scrollbar">
+    <div className="space-y-0 max-h-[420px] overflow-y-auto custom-scrollbar" data-testid="user-assignments">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 mb-2 sticky top-0 z-20 bg-slate-900  rounded-lg border border-slate-800">
         <span className="text-[10px] uppercase tracking-widest font-bold text-white/40">Member</span>
@@ -54,10 +54,11 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
         });
 
         return (
-          <div key={assignment.user.id}>
+          <div key={assignment.user.id} data-testid={`user-assignment-row-${assignment.user.id}`}>
             {/* Row */}
             <div
               onClick={() => setExpandedId(isExpanded ? null : assignment.user.id)}
+              data-testid="user-assignment-header"
               className={`
                 group flex items-center gap-3 px-3 py-2.5 cursor-pointer
                 rounded-xl transition-colors 
@@ -75,16 +76,16 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
 
               {/* Name + email */}
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-[13px] truncate leading-tight">{assignment.user.name}</p>
-                <p className="text-white/35 text-[10px] truncate leading-tight">{assignment.user.email}</p>
+                <p className="text-white font-semibold text-[13px] truncate leading-tight" data-testid="user-assignment-name">{assignment.user.name}</p>
+                <p className="text-white/35 text-[10px] truncate leading-tight" data-testid="user-assignment-email">{assignment.user.email}</p>
               </div>
 
               {/* Module count badge */}
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] font-bold text-emerald-300/90 bg-emerald-500/15 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-bold text-emerald-300/90 bg-emerald-500/15 px-2 py-0.5 rounded-md" data-testid="user-assignment-tc-count">
                   {assignment.modules.reduce((sum: number, m: any) => sum + (Object.values(m.stats || {}).reduce((a: any, b: any) => a + (b as number), 0) as number), 0)} TCs
                 </span>
-                <span className="text-[10px] font-bold text-indigo-300/90 bg-indigo-500/15 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-bold text-indigo-300/90 bg-indigo-500/15 px-2 py-0.5 rounded-md" data-testid="user-assignment-module-count">
                   {assignment.modules.length} {assignment.modules.length === 1 ? 'module' : 'modules'}
                 </span>
                 {/* Chevron */}
@@ -99,7 +100,7 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
 
             {/* Expanded Detail */}
             {isExpanded && (
-              <div className="ml-11 mr-3 mb-2 mt-1 space-y-2    ">
+              <div className="ml-11 mr-3 mb-2 mt-1 space-y-2" data-testid="user-assignment-details">
                 {Object.entries(sessionGroups).map(([sessionName, modules]) => (
                   <div key={sessionName} className="bg-black/30 rounded-lg p-2.5 border border-slate-800">
                     <p className="text-[9px] uppercase tracking-wider font-bold text-white/30 mb-1.5">{sessionName}</p>
@@ -107,6 +108,7 @@ export function UserAssignments({ assignments }: { assignments: any[] }) {
                       {modules.map((mod: any, idx: number) => (
                         <Link
                           key={idx}
+                          data-testid={`user-assignment-module-${mod.id}`}
                           href={`/dashboard/sessions/${mod.session.id}/execution?moduleId=${mod.id}`}
                           className="flex items-center gap-1.5 text-[10px] font-semibold text-white/75 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-200 px-2 py-1 rounded-md border border-slate-800 hover:border-indigo-500/30 transition-colors cursor-pointer"
                         >

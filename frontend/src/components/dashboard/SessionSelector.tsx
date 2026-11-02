@@ -45,8 +45,10 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
   const currentSessionName = currentSession ? sessions.find(s => s.id === currentSession)?.name || 'Unknown Session' : 'Active Sessions';
 
   return (
-    <div className="relative group inline-block z-50" ref={dropdownRef}>
+    <div className="relative group inline-block z-50" ref={dropdownRef} data-testid="session-selector">
       <div 
+        id="session-selector-btn"
+        data-testid="session-selector-btn"
         onClick={() => setIsOpen(!isOpen)}
         className="relative flex items-center bg-[#0f1117] border border-indigo-500/30 hover:border-indigo-400/80 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-[300px]"
       >
@@ -56,7 +58,7 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
         </div>
         
         {/* Selected Value */}
-        <div className="flex-1 pl-4 pr-2 py-3 text-white font-bold text-sm tracking-wide truncate">
+        <div className="flex-1 pl-4 pr-2 py-3 text-white font-bold text-sm tracking-wide truncate" data-testid="session-selector-name">
           {currentSessionName}
         </div>
         
@@ -68,11 +70,13 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full mt-2 w-full bg-slate-900 border border-indigo-500/30 rounded-xl shadow-sm overflow-hidden    ">
+        <div className="absolute top-full mt-2 w-full bg-slate-900 border border-indigo-500/30 rounded-xl shadow-sm overflow-hidden" data-testid="session-selector-menu">
           <div className="p-2 border-b border-slate-800 bg-slate-800">
             <div className="relative">
               <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               <input 
+                id="session-selector-search-input"
+                data-testid="session-selector-search-input"
                 type="text"
                 autoFocus
                 value={searchQuery}
@@ -85,6 +89,8 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
           
           <div className="max-h-60 overflow-y-auto custom-scrollbar">
             <div 
+              id="session-selector-option-active"
+              data-testid="session-selector-option-active"
               onClick={() => handleSelect('')}
               className={`px-4 py-3 text-sm cursor-pointer transition-colors ${!currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-medium'}`}
             >
@@ -96,6 +102,7 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
                 {filteredSessions.slice(0, 10).map(s => (
                   <div 
                     key={s.id}
+                    data-testid={`session-selector-option-${s.id}`}
                     onClick={() => handleSelect(s.id)}
                     className={`px-4 py-3 text-sm cursor-pointer transition-colors ${s.id === currentSession ? 'bg-indigo-500/20 text-indigo-300 font-bold border-l-2 border-indigo-500' : 'text-white hover:bg-white/5 font-medium'}`}
                   >
@@ -103,13 +110,13 @@ export function SessionSelector({ currentSession }: { currentSession?: string })
                   </div>
                 ))}
                 {filteredSessions.length > 10 && (
-                  <div className="px-4 py-3 text-xs text-center text-white/40 italic bg-slate-800">
+                  <div className="px-4 py-3 text-xs text-center text-white/40 italic bg-slate-800" data-testid="session-selector-more-hint">
                     + {filteredSessions.length - 10} more sessions. Type to refine.
                   </div>
                 )}
               </>
             ) : (
-              <div className="px-4 py-8 text-center text-sm text-white/40">
+              <div className="px-4 py-8 text-center text-sm text-white/40" data-testid="session-selector-empty">
                 No sessions found
               </div>
             )}
