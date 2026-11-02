@@ -25,7 +25,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
     stepId?: string;
     statusId: number;
     notes: string;
-  }>({ isOpen: false, type: 'TESTCASE', testcaseId: '', statusId: 0, notes: '' });
+    errorMessage?: string;
+  }>({ isOpen: false, type: 'TESTCASE', testcaseId: '', statusId: 0, notes: '', errorMessage: '' });
   const [restrictionModal, setRestrictionModal] = useState<{isOpen: boolean, message: string}>({ isOpen: false, message: '' });
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -72,6 +73,13 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
   const submitStatusUpdate = async (type: 'TESTCASE' | 'STEP', tcId: string, stepId: string | undefined, statusId: number, notes: string) => {
     if (!currentUser) return alert("User data not loaded yet. Please try again.");
 
+    const targetStatus = statuses.find(s => s.id === statusId);
+    const isPassedWithNotes = ['PASSED WITH NOTES', 'PASSED WITH NOTE'].includes(targetStatus?.name?.trim().toUpperCase() || '');
+    if (isPassedWithNotes && !notes.trim()) {
+      setNotesModal(prev => ({ ...prev, errorMessage: 'Alasan wajib diisi ketika mengubah status menjadi Passed with Notes.' }));
+      return;
+    }
+
     const url = type === 'TESTCASE' 
       ? `${baseUrl}/sessions/${sessionId}/testcases/${tcId}/status`
       : `${baseUrl}/sessions/${sessionId}/testcases/${tcId}/steps/${stepId}/status`;
@@ -84,16 +92,24 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authStr.access_token}`
         },
-        body: JSON.stringify({ statusId, notes, userId: currentUser.id })
+        body: JSON.stringify({ statusId, notes: notes.trim(), userId: currentUser.id })
       });
       
       if (res.ok) {
         fetchTestcases();
-        setNotesModal(prev => ({ ...prev, isOpen: false }));
+        setNotesModal(prev => ({ ...prev, isOpen: false, errorMessage: '' }));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('execution-status-updated'));
+          try {
+            sessionStorage.setItem('last_execution_update', Date.now().toString());
+          } catch (e) {}
+        }
       } else {
         const err = await res.json();
         if (res.status === 400 && err.message?.toLowerCase().includes('claim')) {
           setRestrictionModal({ isOpen: true, message: err.message });
+        } else if (res.status === 400 && err.message?.toLowerCase().includes('alasan')) {
+          setNotesModal(prev => ({ ...prev, errorMessage: err.message }));
         } else {
           alert(err.message || 'Failed to update status');
         }
@@ -104,8 +120,18 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
     }
   };
 
+  const isAdmin = ['admin', 'super admin'].includes(currentUser?.role?.trim().toLowerCase() || '');
+
   const handleStatusChange = async (tc: any, statusId: number, currentStatusId: number) => {
     if (statusId === currentStatusId) return;
+
+    if (isAdmin) {
+      setRestrictionModal({ 
+        isOpen: true, 
+        message: 'Super Admin tidak dapat melakukan claim atau mengeksekusi testcase.' 
+      });
+      return;
+    }
 
     // Check frontend claim
     const claim = tc.testcase?.module?.claimHistories?.find((c: any) => c.sessionId === sessionId);
@@ -124,7 +150,8 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
         type: 'TESTCASE',
         testcaseId: tc.testcaseId,
         statusId,
-        notes: ''
+        notes: tc.notes || '',
+        errorMessage: ''
       });
       return;
     }
@@ -134,6 +161,14 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
   const handleStepStatusChange = async (tc: any, stepId: string, statusId: number, currentStatusId: number) => {
     if (statusId === currentStatusId) return;
+
+    if (isAdmin) {
+      setRestrictionModal({ 
+        isOpen: true, 
+        message: 'Super Admin tidak dapat melakukan claim atau mengeksekusi testcase.' 
+      });
+      return;
+    }
 
     // Check frontend claim
     const claim = tc.testcase?.module?.claimHistories?.find((c: any) => c.sessionId === sessionId);
@@ -147,13 +182,15 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
     const status = statuses.find(s => s.id === statusId);
     if (status && ['PASSED WITH NOTES', 'FAILED', 'DROPPED'].includes(status.name.toUpperCase())) {
+      const stepExec = tc.stepExecutions?.find((se: any) => se.stepId === stepId);
       setNotesModal({
         isOpen: true,
         type: 'STEP',
         testcaseId: tc.testcaseId,
         stepId,
         statusId,
-        notes: ''
+        notes: stepExec?.notes || '',
+        errorMessage: ''
       });
       return;
     }
@@ -240,10 +277,12 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
           <tbody>
             {filteredTestcases.map((tc: any) => {
               const claim = tc.testcase?.module?.claimHistories?.find((c: any) => c.sessionId === sessionId);
-              const claimedByMe = claim && claim.claimedById === currentUser?.id;
-              const tooltipMsg = !claimedByMe 
-                ? (!claim ? 'Module harus di-claim sebelum testcase dapat dieksekusi.' : 'Hanya user yang melakukan claim pada module ini yang dapat mengeksekusi testcase-nya.') 
-                : '';
+              const claimedByMe = !isAdmin && claim && claim.claimedById === currentUser?.id;
+              const tooltipMsg = isAdmin
+                ? 'Super Admin tidak dapat mengeksekusi testcase.'
+                : !claimedByMe 
+                  ? (!claim ? 'Module harus di-claim sebelum testcase dapat dieksekusi.' : 'Hanya user yang melakukan claim pada module ini yang dapat mengeksekusi testcase-nya.') 
+                  : '';
 
               return (
                 <Fragment key={tc.id}>
@@ -392,6 +431,7 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
               const statusName = statuses.find(s => s.id === notesModal.statusId)?.name?.toUpperCase() || '';
               const isFailed = statusName === 'FAILED';
               const isDropped = statusName === 'DROPPED';
+              const isPassedWithNotes = ['PASSED WITH NOTES', 'PASSED WITH NOTE'].includes(statusName);
               const gradientClass = isFailed ? 'from-rose-500 to-rose-400' : (isDropped ? 'from-zinc-500 to-zinc-400' : 'from-amber-500 to-amber-400');
               const ringClass = isFailed ? 'focus:ring-rose-500/50' : (isDropped ? 'focus:ring-zinc-500/50' : 'focus:ring-amber-500/50');
               const btnClass = isFailed ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-[0_0_15px_rgba(244,63,94,0.2)]' : (isDropped ? 'bg-zinc-500 hover:bg-zinc-400 text-white shadow-[0_0_15px_rgba(113,113,122,0.2)]' : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.2)]');
@@ -402,7 +442,14 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
                   <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${gradientClass}`}></div>
                   
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-base font-bold text-white">Add Notes</h3>
+                    <div>
+                      <h3 className="text-base font-bold text-white">
+                        {isPassedWithNotes ? 'Passed with Note' : 'Add Notes'}
+                      </h3>
+                      {isPassedWithNotes && (
+                        <p className="text-[11px] text-amber-400 font-medium mt-0.5">* Alasan wajib diisi</p>
+                      )}
+                    </div>
                     <span className={`px-2 py-0.5 rounded uppercase text-[10px] font-bold border ${badgeClass}`}>
                       {statusName}
                     </span>
@@ -410,27 +457,38 @@ export function ExecutionTable({ sessionId, sessionStatus }: { sessionId: string
 
                   <textarea
                     value={notesModal.notes}
-                    onChange={(e) => setNotesModal({ ...notesModal, notes: e.target.value })}
+                    onChange={(e) => setNotesModal({ ...notesModal, notes: e.target.value, errorMessage: '' })}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                         submitStatusUpdate(notesModal.type, notesModal.testcaseId, notesModal.stepId, notesModal.statusId, notesModal.notes);
                       }
                     }}
-                    placeholder="Optional details (Cmd/Ctrl + Enter to save)..."
-                    className={`w-full h-24 bg-slate-800 border border-slate-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:ring-2 resize-none  ${ringClass}`}
+                    placeholder={isPassedWithNotes ? "Masukkan alasan / catatan di sini (wajib)..." : "Optional details (Cmd/Ctrl + Enter to save)..."}
+                    className={`w-full h-24 bg-slate-800 border rounded-xl p-3 text-white text-sm focus:outline-none focus:ring-2 resize-none ${
+                      notesModal.errorMessage ? 'border-rose-500 focus:ring-rose-500/50' : 'border-slate-800'
+                    } ${ringClass}`}
                     autoFocus
                   />
 
+                  {notesModal.errorMessage && (
+                    <p className="text-rose-400 text-xs mt-1.5 font-medium flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {notesModal.errorMessage}
+                    </p>
+                  )}
+
                   <div className="flex justify-end gap-2 mt-4">
                     <button 
-                      onClick={() => setNotesModal({ ...notesModal, isOpen: false })}
+                      onClick={() => setNotesModal({ ...notesModal, isOpen: false, errorMessage: '' })}
                       className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-slate-900 transition-colors text-sm font-semibold"
                     >
                       Cancel
                     </button>
                     <button 
                       onClick={() => submitStatusUpdate(notesModal.type, notesModal.testcaseId, notesModal.stepId, notesModal.statusId, notesModal.notes)}
-                      className={`px-5 py-2 rounded-lg font-bold  text-sm ${btnClass}`}
+                      className={`px-5 py-2 rounded-lg font-bold text-sm ${btnClass}`}
                     >
                       Save
                     </button>

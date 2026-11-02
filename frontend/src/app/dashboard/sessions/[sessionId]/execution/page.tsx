@@ -6,6 +6,9 @@ import { ExecutionTable } from '@/components/dashboard/ExecutionTable';
 import Link from 'next/link';
 import { BackButton } from '@/components/dashboard/BackButton';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function fetchSessionInfo(sessionId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   const res = await fetch(`${baseUrl}/sessions`, { cache: 'no-store' });
@@ -30,7 +33,7 @@ export default async function ExecutionMenuPage({ params }: { params: Promise<{ 
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900  border border-slate-700 p-6 rounded-[2rem] shadow-sm">
             <div className="flex-1">
               <div className="flex items-center gap-4">
-                <BackButton />
+                <BackButton href={`/dashboard/sessions/${resolvedParams.sessionId}`} />
                 <div>
                   <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-md">
                     {session ? session.name : 'Execution Menu'}

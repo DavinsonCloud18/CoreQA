@@ -133,15 +133,14 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
           <SummaryCards summary={data.summary} />
           
           {!isSingleSessionMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
               {activeSessionsWithAnalytics.map(session => (
-                <section key={session.id} className="bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center">
-                  
+                <section key={session.id} className="bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-between">
                   
                   <div className="w-full flex justify-between items-start mb-6 relative z-10">
-                    <div className="container">
-                      <h2 className="text-xl font-bold text-white mb-2 truncate text-nowrap">{session.name}</h2>
-                      <div className="flex items-center gap-2">
+                    <div className="w-full min-w-0">
+                      <h2 className="text-xl font-bold text-white mb-2 truncate" title={session.name}>{session.name}</h2>
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                           {session.status}
                         </span>
@@ -157,13 +156,13 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                     </div>
                   </div>
 
-                  <div className="w-full relative z-10 mb-6">
+                  <div className="w-full relative z-10 mb-6 flex justify-center">
                     <ExecutionChart summary={session.analytics.summary} />
                   </div>
 
                   <a 
                     href={`/dashboard/execution?session=${session.id}`}
-                    className="relative z-10 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-center shadow-sm hover:  flex justify-center items-center gap-2"
+                    className="relative z-10 w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-center shadow-sm flex justify-center items-center gap-2 transition-colors"
                   >
                     Execute Session
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -177,15 +176,15 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-8">
               {/* Chart on the left */}
-              <section className="lg:col-span-4 bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-center">
-                <div className="w-full flex flex-col items-start mb-8 relative z-10">
+              <section className="xl:col-span-5 2xl:col-span-4 bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-[2rem] shadow-sm relative overflow-hidden flex flex-col items-center justify-between">
+                <div className="w-full flex flex-col items-start mb-6 relative z-10">
                   <h2 className="text-xl font-bold text-white mb-2">
                     Execution Status Distribution
                   </h2>
                   {targetSessionId && data && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[10px] uppercase font-bold px-2 py-1 rounded bg-slate-900 text-white/70 border border-slate-800">
                         {(() => {
                           const s = allSessions.find((s: any) => s.id === targetSessionId);
@@ -201,11 +200,13 @@ export default async function GlobalDashboardPage({ searchParams }: { searchPara
                     </div>
                   )}
                 </div>
-                <ExecutionChart summary={data.summary} />
+                <div className="w-full relative z-10 mb-2 flex justify-center">
+                  <ExecutionChart summary={data.summary} />
+                </div>
               </section>
 
               {/* User assignments on the right */}
-              <section className="lg:col-span-8 bg-slate-900  border border-slate-700 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
+              <section className="xl:col-span-7 2xl:col-span-8 bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
                 
                 <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white relative z-10">
                   <span className="w-2 h-6 bg-indigo-500 rounded-full inline-block shadow-[0_0_10px_rgba(99,102,241,0.6)]"></span>

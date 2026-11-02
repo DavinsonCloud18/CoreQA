@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function ImportExportTC() {
   const [activeTab, setActiveTab] = useState<'import' | 'export'>('import');
   const [modules, setModules] = useState<any[]>([]);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,14 +74,54 @@ export function ImportExportTC() {
     }
   };
 
+  const validateAndSetFile = (selectedFile: File) => {
+    if (!selectedFile.name.toLowerCase().endsWith('.xlsx')) {
+      alert('Format file harus berupa .xlsx');
+      return;
+    }
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      alert('Ukuran file maksimal 10 MB');
+      return;
+    }
+    setFile(selectedFile);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        alert('Ukuran file maksimal 10 MB');
-        return;
-      }
-      setFile(selectedFile);
+      validateAndSetFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      validateAndSetFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleRemoveFile = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -113,7 +155,7 @@ export function ImportExportTC() {
           message: `Berhasil import ${result.data?.importedCount || 0} test cases.`,
           errors: []
         });
-        setFile(null);
+        handleRemoveFile();
       } else {
         if (result.errors && Array.isArray(result.errors)) {
           setResultModal({
@@ -268,15 +310,94 @@ export function ImportExportTC() {
               </div>
             </div>
 
-            <div className="bg-slate-800 border-2 border-dashed border-slate-700 rounded-3xl p-12 flex flex-col items-center justify-center mb-6 hover:bg-black/30 transition-colors group">
-              <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <div 
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center mb-6 transition-all duration-200 group ${
+                isDragging 
+                  ? 'border-indigo-400 bg-indigo-500/10 shadow-[0_0_25px_rgba(99,102,241,0.25)] scale-[1.01]' 
+                  : 'bg-slate-800 border-slate-700 hover:bg-black/30'
+              }`}
+            >
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform ${
+                isDragging ? 'bg-indigo-600 text-white scale-110' : 'bg-slate-900 text-white group-hover:scale-110'
+              }`}>
+                {isDragging ? (
+                  <svg className="w-8 h-8 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                )}
               </div>
               
-              <label className="cursor-pointer bg-indigo-600 hover:from-cyan-400 hover:to-blue-400 text-white font-bold py-3 px-8 rounded-xl shadow-sm  mb-4">
-                {file ? file.name : 'Pilih File'}
-                <input type="file" className="hidden" accept=".xlsx" onChange={handleFileChange} />
-              </label>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                className="hidden" 
+                accept=".xlsx" 
+                onChange={handleFileChange} 
+                onClick={(e) => { (e.target as HTMLInputElement).value = ''; }}
+              />
+
+              {isDragging ? (
+                <div className="text-center mb-4">
+                  <p className="text-indigo-300 font-bold text-lg">Lepaskan file di sini</p>
+                  <p className="text-white/60 text-xs mt-1">Hanya file berekstensi .xlsx</p>
+                </div>
+              ) : file ? (
+                <div className="flex flex-col items-center mb-4 w-full">
+                  <div className="flex items-center gap-3 bg-slate-900 border border-slate-700 px-5 py-3 rounded-2xl max-w-md w-full shadow-inner animate-in fade-in duration-200">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0 flex-1 text-left">
+                      <p className="text-white font-bold text-sm truncate" title={file.name}>{file.name}</p>
+                      <p className="text-xs text-slate-400 font-medium">{(file.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="w-8 h-8 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 flex items-center justify-center transition-colors shrink-0"
+                      title="Hapus file"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <label className="mt-2 text-xs text-indigo-300 hover:text-indigo-200 cursor-pointer underline font-medium">
+                    Ganti file lain atau seret file ke sini
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept=".xlsx" 
+                      onChange={handleFileChange} 
+                      onClick={(e) => { (e.target as HTMLInputElement).value = ''; }}
+                    />
+                  </label>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center mb-4">
+                  <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl shadow-sm mb-3 transition-colors">
+                    Pilih File
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept=".xlsx" 
+                      onChange={handleFileChange} 
+                      onClick={(e) => { (e.target as HTMLInputElement).value = ''; }}
+                    />
+                  </label>
+                  <p className="text-white/50 text-xs font-medium">atau seret & lepas (drag & drop) file .xlsx ke sini</p>
+                </div>
+              )}
 
               <p className="text-white/60 font-medium mb-1">xlsx only</p>
               <p className="text-white/40 text-sm mb-4">Ukuran file maksimal 10 MB</p>

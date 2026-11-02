@@ -13,6 +13,9 @@ import { DeleteSessionButton } from '@/components/dashboard/DeleteSessionButton'
 import Link from 'next/link';
 import { BackButton } from '@/components/dashboard/BackButton';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function fetchGlobalAnalytics(sessionId?: string) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   const url = sessionId ? `${baseUrl}/analytics?sessionId=${sessionId}` : `${baseUrl}/analytics`;

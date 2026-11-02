@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { ViewMode, ViewToggle } from './ViewToggle';
 
-export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: string }) {
+export function ModuleList({ modules: initialModules, sessionId }: { modules: any[], sessionId: string }) {
+  const router = useRouter();
+  const [modules, setModules] = useState<any[]>(initialModules || []);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [takeoverModal, setTakeoverModal] = useState<{ isOpen: boolean, moduleId: string | null, moduleName: string | null, currentOwner: string | null }>({
     isOpen: false,
@@ -16,6 +19,51 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
   const [view, setView] = useState<ViewMode>('list');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Sync state whenever initialModules changes from server
+  useEffect(() => {
+    if (initialModules) {
+      setModules(initialModules);
+    }
+  }, [initialModules]);
+
+  const fetchLatestModules = useCallback(async () => {
+    if (!sessionId) return;
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const res = await fetch(`${baseUrl}/sessions/${sessionId}/modules`, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) {
+          setModules(json.data);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [sessionId]);
+
+  useEffect(() => {
+    // When returning to this page (or on mount), fetch latest modules and refresh server components
+    fetchLatestModules();
+
+    const handleRefresh = () => {
+      fetchLatestModules();
+      router.refresh();
+    };
+
+    window.addEventListener('pageshow', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+    window.addEventListener('popstate', handleRefresh);
+    window.addEventListener('execution-status-updated', handleRefresh);
+
+    return () => {
+      window.removeEventListener('pageshow', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+      window.removeEventListener('popstate', handleRefresh);
+      window.removeEventListener('execution-status-updated', handleRefresh);
+    };
+  }, [sessionId, fetchLatestModules, router]);
 
   const filteredModules = useMemo(() => modules.filter((module: any) => {
     const searchMatch = `${module.name || ''} ${module.code || ''} ${module.description || ''}`.toLowerCase().includes(query.trim().toLowerCase());
@@ -35,8 +83,14 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
     }
   }, []);
 
+  const isAdmin = ['admin', 'super admin'].includes(currentUser?.role?.trim().toLowerCase() || '');
+
   const executeClaim = async (moduleId: string) => {
     if (!currentUser) return alert('No user available to claim module');
+    if (isAdmin) {
+      alert('Super Admin tidak dapat melakukan claim module atau testcase.');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const authData = JSON.parse(localStorage.getItem('auth') || '{}');
@@ -67,6 +121,11 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
     e.preventDefault();
     e.stopPropagation();
     
+    if (isAdmin) {
+      alert('Super Admin tidak dapat melakukan claim module atau testcase.');
+      return;
+    }
+
     if (m.isClaimed) {
       setTakeoverModal({
         isOpen: true,
@@ -132,7 +191,17 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
             <Link href={`/dashboard/sessions/${sessionId}/execution?moduleId=${m.id}`} key={m.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 hover:border-indigo-400 sm:gap-4 sm:px-4">
               <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h3 className="truncate text-sm font-semibold text-white">{m.name}</h3><span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-indigo-300">{m.code || 'MOD'}</span></div><p className="mt-1 truncate text-xs text-slate-400">{m.testcaseCount || 0} test cases{m.isClaimed ? ` · Claimed by ${m.claimedBy}` : ' · Unclaimed'}</p></div>
               <div className="flex shrink-0 items-center gap-2 whitespace-nowrap text-[11px] sm:gap-4 sm:text-xs"><span className="whitespace-nowrap text-indigo-300">{completionPct}% executed</span><span className="whitespace-nowrap text-emerald-400">{passedPct}% passed</span></div>
-              {(!m.isClaimed || m.claimedById !== currentUser?.id) ? <div className="flex shrink-0 justify-end"><button onClick={(e) => handleClaimClick(e, m)} className="shrink-0 whitespace-nowrap rounded-lg bg-indigo-600 px-2 py-2 text-[11px] font-semibold text-white hover:bg-indigo-500 sm:px-3 sm:text-xs">{m.isClaimed ? 'Take over' : 'Claim'}</button></div> : <span className="shrink-0 whitespace-nowrap text-right text-xs font-semibold text-emerald-400">Execute →</span>}
+              {isAdmin ? (
+                <span className="shrink-0 whitespace-nowrap text-right text-xs font-semibold text-indigo-300">View →</span>
+              ) : (!m.isClaimed || m.claimedById !== currentUser?.id) ? (
+                <div className="flex shrink-0 justify-end">
+                  <button onClick={(e) => handleClaimClick(e, m)} className="shrink-0 whitespace-nowrap rounded-lg bg-indigo-600 px-2 py-2 text-[11px] font-semibold text-white hover:bg-indigo-500 sm:px-3 sm:text-xs">
+                    {m.isClaimed ? 'Take over' : 'Claim'}
+                  </button>
+                </div>
+              ) : (
+                <span className="shrink-0 whitespace-nowrap text-right text-xs font-semibold text-emerald-400">Execute →</span>
+              )}
             </Link>
           );
           
@@ -215,7 +284,11 @@ export function ModuleList({ modules, sessionId }: { modules: any[], sessionId: 
                   </div>
 
                   {/* Action Button */}
-                  {(!m.isClaimed || (m.isClaimed && m.claimedById !== currentUser?.id)) ? (
+                  {isAdmin ? (
+                    <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-300 group-hover:text-indigo-200 transition-colors bg-indigo-500/10 px-2 py-1 rounded-md border border-indigo-500/20">
+                      View <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </span>
+                  ) : (!m.isClaimed || (m.isClaimed && m.claimedById !== currentUser?.id)) ? (
                     <button 
                        onClick={(e) => handleClaimClick(e, m)}
                        className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-colors z-20 relative"

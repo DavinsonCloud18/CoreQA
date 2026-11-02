@@ -161,12 +161,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const today = getToday();
-    if (startDate < today) {
-      alert('Start date cannot be earlier than today');
-      return;
-    }
-    if (endDate && endDate < startDate) {
+    if (endDate && startDate && endDate < startDate) {
       alert('Target end date cannot be earlier than the start date');
       return;
     }
@@ -196,16 +191,15 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
         })
       });
       if (res.ok) {
-        const data = await res.json();
+        sessionStorage.setItem('session_toast_message', 'Perubahan session berhasil disimpan.');
         onClose();
         window.location.reload();
-        router.refresh();
       } else {
-        alert('Failed to create session');
+        alert('Failed to update session');
       }
     } catch (e) {
       console.error(e);
-      alert('Error creating session');
+      alert('Error updating session');
     } finally {
       setIsSubmitting(false);
     }
@@ -215,7 +209,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 " onClick={onClose}></div>
       
-      <div className="relative z-10 w-full max-w-2xl bg-slate-900/90 border border-slate-700 rounded-[2rem] p-8 shadow-sm  flex flex-col max-h-[90vh]">
+      <div className="relative z-10 w-full max-w-2xl bg-slate-900/90 border border-slate-700 rounded-[2rem] p-8 shadow-sm flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center mb-6 shrink-0">
           <h2 className="text-2xl font-bold text-white">Edit Session</h2>
           <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
@@ -262,7 +256,6 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
               <input 
                 type="date" 
                 required
-                min={getToday()}
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
@@ -273,7 +266,7 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
               <label className="block text-sm font-medium text-indigo-200 mb-2">Target End Date <span className="text-white/30 text-xs font-normal">(Optional)</span></label>
               <input 
                 type="date" 
-                min={startDate || getToday()}
+                min={startDate || undefined}
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-black/30 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 "
@@ -389,9 +382,9 @@ export function EditSessionModal({ isOpen, onClose, session }: { isOpen: boolean
             <button 
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm  hover:   disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:hover:scale-100"
             >
-              {isSubmitting ? 'Creating...' : `Create Session with ${selectedModules.size} Modules`}
+              {isSubmitting ? 'Saving...' : 'Edit Session'}
             </button>
           </div>
         </form>

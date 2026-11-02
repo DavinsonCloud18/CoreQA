@@ -2,12 +2,24 @@
 
 import { useRouter } from 'next/navigation';
 
-export function BackButton() {
+export function BackButton({ href }: { href?: string }) {
   const router = useRouter();
+
+  const handleBack = () => {
+    if (href) {
+      router.push(href);
+      router.refresh();
+    } else {
+      router.back();
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
+    }
+  };
 
   return (
     <button 
-      onClick={() => router.back()} 
+      onClick={handleBack} 
       className="w-12 h-12 bg-white/5 hover:bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center transition-colors shrink-0"
       title="Go Back"
     >

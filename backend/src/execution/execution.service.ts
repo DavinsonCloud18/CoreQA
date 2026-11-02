@@ -26,6 +26,15 @@ export class ExecutionService {
   }
 
   private async validateModuleClaim(sessionId: string, testcaseId: string, userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true }
+    });
+    const roleName = user?.role?.name?.trim().toLowerCase();
+    if (roleName === 'admin' || roleName === 'super admin') {
+      throw new BadRequestException('Super Admin tidak dapat melakukan claim atau mengeksekusi testcase.');
+    }
+
     const testcase = await this.prisma.masterTestcase.findUnique({
       where: { id: testcaseId },
       select: { moduleId: true }
@@ -100,6 +109,20 @@ export class ExecutionService {
         throw new BadRequestException('Session tidak valid atau sudah ditutup.');
       }
 
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        include: { role: true }
+      });
+
+      if (!user) {
+        throw new NotFoundException('User tidak ditemukan.');
+      }
+
+      const roleName = user.role?.name?.trim().toLowerCase();
+      if (roleName === 'admin' || roleName === 'super admin') {
+        throw new BadRequestException('Super Admin tidak dapat melakukan claim module atau testcase.');
+      }
+
       // Allow takeover: invalidate any existing active claim
       await tx.claimHistory.updateMany({
         where: { sessionId, moduleId, isActive: true },
@@ -140,20 +163,29 @@ export class ExecutionService {
 
     if (!targetStatus) throw new NotFoundException('Status tidak ditemukan.');
 
+    const statusNameUpper = targetStatus.name.trim().toUpperCase();
+    if (['PASSED WITH NOTES', 'PASSED WITH NOTE'].includes(statusNameUpper)) {
+      if (!dto.notes || !dto.notes.trim()) {
+        throw new BadRequestException('Alasan wajib diisi ketika status diubah menjadi Passed with Notes.');
+      }
+    }
+
+    const trimmedNotes = dto.notes ? dto.notes.trim() : dto.notes;
+
     const execution = await this.prisma.sessionExecution.upsert({
       where: {
         sessionId_testcaseId: { sessionId, testcaseId }
       },
       update: {
         statusId: dto.statusId,
-        notes: dto.notes,
+        notes: trimmedNotes,
         executedById: userId,
       },
       create: {
         sessionId,
         testcaseId,
         statusId: dto.statusId,
-        notes: dto.notes,
+        notes: trimmedNotes,
         executedById: userId,
       },
       include: { status: true }
@@ -214,6 +246,15 @@ export class ExecutionService {
 
     if (!targetStatus) throw new NotFoundException('Status tidak ditemukan.');
 
+    const statusNameUpper = targetStatus.name.trim().toUpperCase();
+    if (['PASSED WITH NOTES', 'PASSED WITH NOTE'].includes(statusNameUpper)) {
+      if (!dto.notes || !dto.notes.trim()) {
+        throw new BadRequestException('Alasan wajib diisi ketika status diubah menjadi Passed with Notes.');
+      }
+    }
+
+    const trimmedNotes = dto.notes ? dto.notes.trim() : dto.notes;
+
     let execution = await this.prisma.sessionExecution.findUnique({
       where: { sessionId_testcaseId: { sessionId, testcaseId } }
     });
@@ -237,12 +278,12 @@ export class ExecutionService {
           stepId
         }
       },
-      update: { statusId: dto.statusId, notes: dto.notes },
+      update: { statusId: dto.statusId, notes: trimmedNotes },
       create: {
         sessionExecutionId: execution.id,
         stepId,
         statusId: dto.statusId,
-        notes: dto.notes
+        notes: trimmedNotes
       },
       include: { status: true }
     });
@@ -253,7 +294,7 @@ export class ExecutionService {
         data: { 
           statusId: dto.statusId, 
           executedById: userId,
-          ...(dto.notes && { notes: dto.notes })
+          ...(trimmedNotes && { notes: trimmedNotes })
         }
       });
     } else if (targetStatus.name.toUpperCase() === 'PASSED') {
